@@ -1,0 +1,1938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light">
+  <title>Alvin's Operations Workspace</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 64 64%27%3E%3Cdefs%3E%3ClinearGradient id=%27g%27 x1=%270%27 y1=%270%27 x2=%271%27 y2=%271%27%3E%3Cstop offset=%270%25%27 stop-color=%27%23102d4f%27/%3E%3Cstop offset=%27100%25%27 stop-color=%27%231199d2%27/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width=%2764%27 height=%2764%27 rx=%2716%27 fill=%27url(%23g)%27/%3E%3Cpath d=%27M16 46 29 16h7l12 30h-8l-2.5-7H27l-2.7 7H16Zm14-14h5.1L32.6 24 30 32Z%27 fill=%27white%27/%3E%3Ccircle cx=%2748%27 cy=%2716%27 r=%274%27 fill=%27%23d7b86a%27/%3E%3C/svg%3E">
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.8/dist/umd/supabase.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html-docx-js/0.3.1/html-docx.js"></script>
+  <style>
+    :root {
+      --navy: #102d4f;
+      --blue: #1199d2;
+      --blue-2: #37c5ef;
+      --gold: #d7b86a;
+      --bg: #eef5fb;
+      --card: rgba(255, 255, 255, 0.92);
+      --text: #10253f;
+      --muted: #687b91;
+      --line: #d9e6f1;
+      --success: #149765;
+      --warning: #b97808;
+      --danger: #d14343;
+      --shadow: 0 18px 42px rgba(16, 57, 92, 0.12);
+      --radius: 20px;
+    }
+
+    * { box-sizing: border-box; }
+    html { min-width: 320px; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 0 0, rgba(55, 197, 239, 0.18), transparent 28%),
+        linear-gradient(135deg, #f8fbff, #edf5fb 55%, #f5f9fc);
+    }
+
+    button, input, select, textarea { font: inherit; }
+    button:disabled { cursor: not-allowed; opacity: 0.58; transform: none !important; }
+    .hidden { display: none !important; }
+
+    .btn {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 7px 16px rgba(16, 57, 92, 0.07);
+      transition: transform 0.16s ease, box-shadow 0.16s ease;
+    }
+    .btn:hover:not(:disabled) { transform: translateY(-1px); }
+    .btn-primary {
+      border-color: transparent;
+      color: #fff;
+      background: linear-gradient(135deg, var(--blue-2), var(--blue), var(--navy));
+      box-shadow: 0 12px 24px rgba(17, 153, 210, 0.24);
+    }
+    .btn-danger { color: var(--danger); background: #fff6f6; border-color: #ffd4d4; }
+    .btn-icon { min-width: 42px; padding: 9px 12px; }
+
+    .login-shell { min-height: 100vh; display: grid; place-items: center; padding: 24px; }
+    .login-card {
+      width: min(430px, 100%);
+      background: var(--card);
+      border: 1px solid rgba(255, 255, 255, 0.85);
+      border-radius: 28px;
+      padding: 34px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+    .logo {
+      width: 54px;
+      height: 54px;
+      border-radius: 17px;
+      background: linear-gradient(135deg, var(--blue-2), var(--blue), var(--navy));
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-size: 24px;
+      font-weight: 800;
+      box-shadow: 0 13px 27px rgba(17, 153, 210, 0.25);
+    }
+    h1, h2, h3, p { margin-top: 0; }
+    .login-card h1 { margin: 20px 0 8px; font-size: 28px; }
+    .muted { color: var(--muted); }
+
+    .field { margin-bottom: 14px; }
+    .field label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 7px; }
+    .field input,
+    .field select,
+    .field textarea,
+    .toolbar input,
+    .toolbar select,
+    .type-row input {
+      width: 100%;
+      border: 1px solid #bcd0e2;
+      border-radius: 12px;
+      padding: 11px 12px;
+      background: #fff;
+      outline: none;
+      color: var(--text);
+    }
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus,
+    .toolbar input:focus,
+    .toolbar select:focus,
+    .type-row input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 4px rgba(17, 153, 210, 0.11);
+    }
+    .login-msg { min-height: 22px; color: var(--danger); font-size: 13px; margin-top: 10px; }
+
+    .app-shell { max-width: 1600px; margin: auto; padding: 18px; }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 15px 18px;
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+      margin-bottom: 14px;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand .logo { width: 44px; height: 44px; border-radius: 14px; font-size: 18px; }
+    .brand strong { display: block; font-size: 17px; }
+    .brand span { display: block; font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .top-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+
+    .nav-tabs { display: flex; gap: 8px; margin-bottom: 14px; }
+    .nav-tab {
+      padding: 11px 16px;
+      border-radius: 13px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.82);
+      font-weight: 750;
+      cursor: pointer;
+    }
+    .nav-tab.active {
+      background: linear-gradient(135deg, var(--blue-2), var(--blue), var(--navy));
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 12px 22px rgba(17, 153, 210, 0.22);
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid rgba(255, 255, 255, 0.85);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+    }
+    .panel-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 17px 19px;
+      border-bottom: 1px solid var(--line);
+    }
+    .panel-head h2 { font-size: 20px; margin: 0; }
+    .panel-head p { margin: 4px 0 0; font-size: 13px; color: var(--muted); }
+    .panel-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .dashboard-stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 14px; }
+    .reception-stats { grid-template-columns: repeat(4, 1fr); }
+    .reception-toolbar { grid-template-columns: 1.4fr 0.8fr 0.8fr auto; }
+    .reception-table { min-width: 1120px; }
+    .person-name { font-weight: 800; }
+    .person-sub { color: var(--muted); font-size: 12px; margin-top: 4px; }
+    .status-active { background: #e3f6ec; color: #14754c; }
+    .status-archived { background: #edf1f5; color: #66788b; }
+    .status-ending { background: #fff1d9; color: #9b6200; }
+
+    .profile-link { border: 0; background: none; padding: 0; color: var(--navy); font-weight: 800; cursor: pointer; text-align: left; }
+    .profile-link:hover { color: var(--blue); text-decoration: underline; }
+    .profile-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
+    .profile-card { border: 1px solid var(--line); border-radius: 14px; padding: 12px; background: #f8fbfd; }
+    .profile-card small { color: var(--muted); display: block; margin-bottom: 5px; }
+    .profile-card strong { overflow-wrap: anywhere; }
+    .score-circle { width: 82px; height: 82px; border-radius: 50%; display: grid; place-items: center; font-size: 23px; font-weight: 850; background: linear-gradient(135deg,#e6f8ff,#fff); border: 7px solid #ccecf8; }
+    .eval-summary { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:14px; border:1px solid var(--line); border-radius:16px; background:#f8fbfd; margin-bottom:14px; }
+    .eval-table { min-width: 980px; }
+    .eval-table input[type="number"] { width:76px; padding:8px; border:1px solid #bcd0e2; border-radius:9px; }
+    .criterion-title { font-weight:750; }
+    .criterion-help { font-size:11px; color:var(--muted); margin-top:3px; }
+    .severity-minor { color:#456079; }
+    .severity-standard { color:#235db0; }
+    .severity-major { color:#a75b00; }
+    .severity-critical { color:#b42323; font-weight:800; }
+    .history-card { border:1px solid var(--line); border-radius:14px; padding:13px; margin-bottom:9px; background:#fff; display:grid; grid-template-columns:1fr auto; gap:12px; }
+    .history-card h4 { margin:0 0 5px; }
+    .history-actions { display:flex; gap:6px; align-items:flex-start; flex-wrap:wrap; }
+    .modal-card.wide { width:min(1180px,96vw); max-height:94vh; }
+    .section-title { margin:18px 0 9px; font-size:15px; }
+    .ack-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    @media (max-width: 850px) { .profile-grid { grid-template-columns:1fr 1fr; } .ack-row{grid-template-columns:1fr;} }
+
+    .stat { padding: 16px 17px; }
+    .stat small { color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; }
+    .stat b { display: block; font-size: 27px; margin-top: 7px; }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr 0.8fr 0.8fr auto;
+      gap: 8px;
+      padding: 13px 16px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .kanban { display: grid; grid-template-columns: repeat(4, minmax(270px, 1fr)); gap: 12px; padding: 14px; overflow-x: auto; }
+    .column { background: #f4f8fc; border: 1px solid var(--line); border-radius: 16px; min-height: 430px; }
+    .column-head { display: flex; justify-content: space-between; align-items: center; padding: 13px 14px; border-bottom: 1px solid var(--line); font-weight: 800; }
+    .count { background: #e3edf6; border-radius: 999px; padding: 3px 8px; font-size: 12px; }
+    .dropzone { min-height: 365px; padding: 10px; transition: background 0.15s ease; }
+    .dropzone.drag-over { background: rgba(17, 153, 210, 0.08); }
+    .task-card { background: #fff; border: 1px solid #dae6f0; border-radius: 14px; padding: 13px; margin-bottom: 9px; box-shadow: 0 8px 16px rgba(16, 57, 92, 0.06); cursor: grab; }
+    .task-card:active { cursor: grabbing; }
+    .task-top { display: flex; justify-content: space-between; gap: 8px; }
+    .task-title { font-weight: 800; line-height: 1.35; overflow-wrap: anywhere; }
+    .task-meta { font-size: 12px; color: var(--muted); margin-top: 8px; display: grid; gap: 5px; }
+    .pill { display: inline-flex; padding: 4px 8px; border-radius: 999px; font-size: 11px; font-weight: 800; white-space: nowrap; }
+    .p-critical { background: #ffe4e4; color: #b42323; }
+    .p-high { background: #fff0df; color: #a75b00; }
+    .p-medium { background: #e8f1ff; color: #235db0; }
+    .p-low { background: #e6f7ef; color: #13794d; }
+    .label { display: inline-block; margin: 7px 5px 0 0; padding: 3px 7px; border-radius: 999px; background: #eef4f9; color: #456079; font-size: 11px; }
+    .column-empty { padding: 16px 8px; text-align: center; color: var(--muted); font-size: 12px; }
+
+    .tracker-grid { display: grid; grid-template-columns: 350px minmax(0, 1fr); gap: 14px; }
+    .form-body { padding: 17px; }
+    .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .tabs { display: flex; flex-wrap: wrap; gap: 7px; padding: 12px 15px; border-bottom: 1px solid var(--line); }
+    .task-tab { border: 1px solid var(--line); background: #fff; border-radius: 999px; padding: 7px 10px; font-weight: 700; font-size: 12px; cursor: pointer; }
+    .task-tab.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+
+    .table-wrap { overflow: auto; }
+    table { width: 100%; border-collapse: collapse; min-width: 1050px; }
+    th, td { padding: 11px 10px; border-bottom: 1px solid #e8eef4; text-align: left; vertical-align: top; font-size: 13px; }
+    th { background: #f7fafc; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .badge { display: inline-flex; padding: 5px 8px; border-radius: 999px; font-size: 11px; font-weight: 800; white-space: nowrap; }
+    .scheduled { background: #e8f1ff; color: #245cb3; }
+    .progress { background: #fff1d9; color: #9b6200; }
+    .completed { background: #e3f6ec; color: #14754c; }
+    .overdue { background: #ffe8e8; color: #b82e2e; }
+    .table-empty { text-align: center; color: var(--muted); padding: 32px 12px; }
+    .row-actions { display: flex; gap: 5px; flex-wrap: wrap; }
+    .row-actions .btn { padding: 7px 9px; font-size: 11px; border-radius: 8px; }
+
+    .modal { position: fixed; inset: 0; background: rgba(9, 28, 47, 0.48); display: grid; place-items: center; padding: 20px; z-index: 50; }
+    .modal-card { width: min(620px, 100%); max-height: 92vh; overflow: auto; background: #fff; border-radius: 22px; box-shadow: 0 30px 80px rgba(0, 0, 0, 0.25); }
+    .modal-head { display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; border-bottom: 1px solid var(--line); }
+    .modal-head h3 { margin: 0; }
+    .modal-body { padding: 20px; }
+    .modal-foot { display: flex; justify-content: flex-end; gap: 8px; padding: 0 20px 20px; }
+    .type-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 8px; margin-bottom: 8px; }
+
+    .connection { font-size: 12px; color: var(--muted); }
+    .connection.ok { color: var(--success); }
+    .connection.error { color: var(--danger); }
+
+    .toast-stack { position: fixed; top: 18px; right: 18px; display: grid; gap: 10px; z-index: 100; width: min(380px, calc(100vw - 36px)); }
+    .toast { background: #fff; border: 1px solid var(--line); border-left: 4px solid var(--blue); border-radius: 12px; box-shadow: var(--shadow); padding: 13px 14px; font-size: 13px; animation: toast-in 0.18s ease-out; }
+    .toast.error { border-left-color: var(--danger); }
+    .toast.success { border-left-color: var(--success); }
+    @keyframes toast-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+
+    .activity-section {
+      margin-top: 18px;
+      padding-top: 18px;
+      border-top: 1px solid var(--line);
+    }
+    .activity-section.hidden { display: none; }
+    .activity-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .activity-head h4 { margin: 0; font-size: 15px; }
+    .activity-head span { color: var(--muted); font-size: 12px; }
+    .update-composer {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: end;
+      margin-bottom: 14px;
+    }
+    .update-composer textarea { min-height: 72px; resize: vertical; }
+    .activity-list { display: grid; gap: 10px; max-height: 260px; overflow-y: auto; padding-right: 3px; }
+    .activity-item {
+      position: relative;
+      padding: 12px 13px 12px 16px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(248, 251, 255, .88);
+    }
+    .activity-item::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 12px;
+      bottom: 12px;
+      width: 3px;
+      border-radius: 3px;
+      background: var(--primary);
+    }
+    .activity-meta { display: flex; justify-content: space-between; gap: 10px; color: var(--muted); font-size: 11px; margin-bottom: 7px; }
+    .activity-note { white-space: pre-wrap; line-height: 1.45; font-size: 13px; }
+    .activity-empty { color: var(--muted); font-size: 13px; padding: 12px 0; }
+
+
+    @media (max-width: 1150px) {
+      .dashboard-stats { grid-template-columns: repeat(3, 1fr); }
+      .tracker-grid { grid-template-columns: 1fr; }
+      .kanban { grid-template-columns: repeat(4, 290px); }
+    }
+    @media (max-width: 700px) {
+      .app-shell { padding: 10px; }
+      .topbar { align-items: flex-start; flex-direction: column; }
+      .top-actions { justify-content: flex-start; }
+      .dashboard-stats { grid-template-columns: 1fr 1fr; }
+      .toolbar { grid-template-columns: 1fr; }
+      .row2 { grid-template-columns: 1fr; }
+      .nav-tabs { overflow: auto; }
+      .panel-head { align-items: flex-start; flex-direction: column; }
+      .type-row { grid-template-columns: 1fr 1fr; }
+      .type-row input { grid-column: 1 / -1; }
+    }
+  </style>
+</head>
+<body>
+  <div id="toastStack" class="toast-stack" aria-live="polite"></div>
+
+  <section id="loginView" class="login-shell">
+    <div class="login-card">
+      <div class="logo">A</div>
+      <h1>Alvin's Operations</h1>
+      <p class="muted">Sign in to access the project dashboard and maintenance tracker.</p>
+      <form id="loginForm">
+        <div class="field">
+          <label for="loginEmail">Email</label>
+          <input id="loginEmail" type="email" required autocomplete="email">
+        </div>
+        <div class="field">
+          <label for="loginPassword">Password</label>
+          <input id="loginPassword" type="password" required autocomplete="current-password">
+        </div>
+        <button id="loginButton" class="btn btn-primary" style="width:100%" type="submit">Sign In</button>
+        <div id="loginMsg" class="login-msg" role="alert"></div>
+      </form>
+    </div>
+  </section>
+
+  <section id="appView" class="hidden">
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand">
+          <div class="logo">A</div>
+          <div>
+            <strong>Alvin's Operations Workspace</strong>
+            <span id="userEmail"></span>
+          </div>
+        </div>
+        <div class="top-actions">
+          <span id="connectionStatus" class="connection">Connecting…</span>
+          <button id="logoutBtn" class="btn" type="button">Log Out</button>
+        </div>
+      </header>
+
+      <nav class="nav-tabs" aria-label="Workspace sections">
+        <button class="nav-tab active" type="button" data-view="dashboard">Task Dashboard</button>
+        <button class="nav-tab" type="button" data-view="tracker">Maintenance Tracker</button>
+        <button class="nav-tab" type="button" data-view="reception">Reception Management</button>
+      </nav>
+
+      <main id="dashboardView">
+        <section class="dashboard-stats">
+          <div class="panel stat"><small>Total Tasks</small><b id="pmTotal">0</b></div>
+          <div class="panel stat"><small>Backlog</small><b id="pmBacklog">0</b></div>
+          <div class="panel stat"><small>In Progress</small><b id="pmProgress">0</b></div>
+          <div class="panel stat"><small>Due Soon</small><b id="pmDue">0</b></div>
+          <div class="panel stat"><small>Completed</small><b id="pmDone">0</b></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Task Board</h2>
+              <p>Plan, assign, prioritise, and move tasks through each work stage.</p>
+            </div>
+            <button id="newProjectTaskBtn" class="btn btn-primary" type="button">+ Add Task</button>
+          </div>
+          <div class="toolbar">
+            <input id="pmSearch" aria-label="Search project tasks" placeholder="Search tasks, project, assignee...">
+            <select id="sprintFilter" aria-label="Filter by sprint"><option value="">All Sprints</option></select>
+            <select id="projectFilter" aria-label="Filter by project"><option value="">All Projects</option></select>
+            <select id="priorityFilter" aria-label="Filter by priority">
+              <option value="">All Priorities</option>
+              <option>Critical</option><option>High</option><option>Medium</option><option>Low</option>
+            </select>
+            <button id="clearPmFilters" class="btn" type="button">Clear</button>
+          </div>
+          <div class="kanban" id="kanbanBoard"></div>
+        </section>
+      </main>
+
+      <main id="trackerView" class="hidden">
+        <section class="tracker-grid">
+          <aside class="panel">
+            <div class="panel-head">
+              <div><h2 id="formTitle">Add Schedule</h2><p>Create or update a maintenance record.</p></div>
+            </div>
+            <div class="form-body">
+              <form id="maintenanceForm">
+                <input id="maintenanceId" type="hidden">
+                <div class="field"><label for="maintenanceType">Task Type</label><select id="maintenanceType" required></select></div>
+                <div class="field"><label for="property">Property</label><input id="property" required placeholder="e.g. Olympic Hotel"></div>
+                <div class="row2">
+                  <div class="field"><label for="area">Room / Area</label><input id="area"></div>
+                  <div class="field"><label for="maintenanceAssigned">Assigned To</label><input id="maintenanceAssigned"></div>
+                </div>
+                <div class="row2">
+                  <div class="field"><label for="scheduledDate">Scheduled Date</label><input id="scheduledDate" type="date" required></div>
+                  <div class="field"><label for="scheduledTime">Time</label><input id="scheduledTime" type="time"></div>
+                </div>
+                <div class="row2">
+                  <div class="field">
+                    <label for="frequency">Frequency</label>
+                    <select id="frequency"><option>One-time</option><option>Daily</option><option>Weekly</option><option>Fortnightly</option><option>Monthly</option><option>Quarterly</option></select>
+                  </div>
+                  <div class="field">
+                    <label for="maintenanceStatus">Status</label>
+                    <select id="maintenanceStatus"><option>Scheduled</option><option>In Progress</option><option>Completed</option></select>
+                  </div>
+                </div>
+                <div class="field"><label for="completedDate">Completed Date</label><input id="completedDate" type="date"></div>
+                <div class="field"><label for="maintenanceNotes">Notes</label><textarea id="maintenanceNotes" rows="4"></textarea></div>
+                <div class="row2">
+                  <button id="saveMaintenanceBtn" class="btn btn-primary" type="submit">Save Record</button>
+                  <button id="clearMaintenance" class="btn" type="button">Clear</button>
+                </div>
+              </form>
+            </div>
+          </aside>
+
+          <section class="panel">
+            <div class="panel-head">
+              <div><h2>Maintenance Records</h2><p>Scheduled operational and compliance tasks.</p></div>
+              <div class="panel-actions">
+                <button id="manageTypesBtn" class="btn" type="button">Manage Task Types</button>
+                <button id="exportBtn" class="btn btn-primary" type="button">Export Word Report</button>
+              </div>
+            </div>
+            <div id="maintenanceTabs" class="tabs"></div>
+            <div class="toolbar">
+              <input id="maintenanceSearch" aria-label="Search maintenance records" placeholder="Search records...">
+              <select id="maintenanceStatusFilter" aria-label="Filter maintenance status">
+                <option value="">All Statuses</option><option>Scheduled</option><option>In Progress</option><option>Completed</option><option>Overdue</option>
+              </select>
+              <input id="maintenanceDateFilter" type="date" aria-label="Filter scheduled date">
+              <select id="maintenanceFrequencyFilter" aria-label="Filter frequency">
+                <option value="">All Frequencies</option><option>One-time</option><option>Daily</option><option>Weekly</option><option>Fortnightly</option><option>Monthly</option><option>Quarterly</option>
+              </select>
+              <button id="clearMaintenanceFilters" class="btn" type="button">Clear</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Schedule</th><th>Task</th><th>Property / Area</th><th>Assigned</th><th>Frequency</th><th>Status</th><th>Completed</th><th>Notes</th><th>Actions</th></tr></thead>
+                <tbody id="maintenanceBody"></tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+      </main>
+
+      <main id="receptionView" class="hidden">
+        <section class="dashboard-stats reception-stats">
+          <div class="panel stat"><small>Total Receptionists</small><b id="receptionTotal">0</b></div>
+          <div class="panel stat"><small>Active</small><b id="receptionActive">0</b></div>
+          <div class="panel stat"><small>Contracts Ending Soon</small><b id="receptionEndingSoon">0</b></div>
+          <div class="panel stat"><small>Archived</small><b id="receptionArchived">0</b></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Reception Management</h2>
+              <p>Manage receptionist employment records, contract dates, assignments, and archived staff.</p>
+            </div>
+            <button id="newReceptionistBtn" class="btn btn-primary" type="button">+ Add Receptionist</button>
+          </div>
+          <div class="toolbar reception-toolbar">
+            <input id="receptionSearch" aria-label="Search receptionists" placeholder="Search name, email, property...">
+            <select id="receptionStatusFilter" aria-label="Filter receptionist status">
+              <option value="active">Active Receptionists</option>
+              <option value="archived">Archived Receptionists</option>
+              <option value="all">All Receptionists</option>
+            </select>
+            <select id="receptionPropertyFilter" aria-label="Filter by property"><option value="">All Properties</option></select>
+            <button id="clearReceptionFilters" class="btn" type="button">Clear</button>
+          </div>
+          <div class="table-wrap">
+            <table class="reception-table">
+              <thead><tr><th>Receptionist</th><th>Contact</th><th>Property / Assignment</th><th>Start Date</th><th>Contract Termination</th><th>Status</th><th>Notes</th><th>Actions</th></tr></thead>
+              <tbody id="receptionBody"></tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+  </section>
+
+  <div id="taskModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="taskModalTitle">
+    <div class="modal-card">
+      <div class="modal-head"><h3 id="taskModalTitle">Add Project Task</h3><button class="btn btn-icon" type="button" data-close="taskModal" aria-label="Close">×</button></div>
+      <form id="projectTaskForm">
+        <div class="modal-body">
+          <input id="projectTaskId" type="hidden">
+          <div class="field"><label for="projectTaskTitle">Task Title</label><input id="projectTaskTitle" required maxlength="200"></div>
+          <div class="field"><label for="projectTaskDescription">Description</label><textarea id="projectTaskDescription" rows="4"></textarea></div>
+          <div class="row2">
+            <div class="field"><label for="projectName">Project</label><input id="projectName" placeholder="e.g. Olympic Upgrade"></div>
+            <div class="field"><label for="sprintName">Sprint</label><input id="sprintName" placeholder="e.g. Sprint 1"></div>
+          </div>
+          <div class="row2">
+            <div class="field"><label for="projectTaskStatus">Status</label><select id="projectTaskStatus"><option>Backlog</option><option>To Do</option><option>In Progress</option><option>Done</option></select></div>
+            <div class="field"><label for="projectTaskPriority">Priority</label><select id="projectTaskPriority"><option>Medium</option><option>Critical</option><option>High</option><option>Low</option></select></div>
+          </div>
+          <div class="row2">
+            <div class="field"><label for="projectTaskAssignee">Assignee</label><input id="projectTaskAssignee"></div>
+            <div class="field"><label for="projectTaskDue">Due Date</label><input id="projectTaskDue" type="date"></div>
+          </div>
+          <div class="field"><label for="projectTaskLabels">Labels</label><input id="projectTaskLabels" placeholder="maintenance, urgent, supplier"></div>
+
+          <section id="taskActivitySection" class="activity-section hidden">
+            <div class="activity-head">
+              <h4>Updates & Activity</h4>
+              <span>Notes are timestamped automatically</span>
+            </div>
+            <div class="update-composer">
+              <div class="field" style="margin:0">
+                <label for="taskUpdateNote">Add Update</label>
+                <textarea id="taskUpdateNote" rows="2" maxlength="4000" placeholder="Add progress notes, decisions, issues, follow-up details..."></textarea>
+              </div>
+              <button id="addTaskUpdateBtn" class="btn btn-primary" type="button">Add Update</button>
+            </div>
+            <div id="taskActivityList" class="activity-list"></div>
+          </section>
+        </div>
+        <div class="modal-foot">
+          <button id="deleteProjectTaskBtn" class="btn btn-danger hidden" type="button">Delete</button>
+          <button class="btn" type="button" data-close="taskModal">Cancel</button>
+          <button id="saveProjectTaskBtn" class="btn btn-primary" type="submit">Save Task</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <div id="receptionistModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="receptionistModalTitle">
+    <div class="modal-card">
+      <div class="modal-head"><h3 id="receptionistModalTitle">Add Receptionist</h3><button class="btn btn-icon" type="button" data-close="receptionistModal" aria-label="Close">×</button></div>
+      <form id="receptionistForm">
+        <div class="modal-body">
+          <input id="receptionistId" type="hidden">
+          <div class="field"><label for="receptionistName">Full Name</label><input id="receptionistName" required maxlength="160"></div>
+          <div class="row2">
+            <div class="field"><label for="receptionistEmail">Email</label><input id="receptionistEmail" type="email" maxlength="200"></div>
+            <div class="field"><label for="receptionistPhone">Phone / WhatsApp</label><input id="receptionistPhone" maxlength="80"></div>
+          </div>
+          <div class="row2">
+            <div class="field"><label for="receptionistProperty">Primary Property / Assignment</label><input id="receptionistProperty" maxlength="200" placeholder="e.g. Olympic Hotel"></div>
+            <div class="field"><label for="receptionistEmploymentType">Employment Type</label><select id="receptionistEmploymentType"><option>Full-time</option><option>Part-time</option><option>Casual</option><option>Contractor</option><option>Other</option></select></div>
+          </div>
+          <div class="row2">
+            <div class="field"><label for="receptionistStartDate">Starting Date</label><input id="receptionistStartDate" type="date" required></div>
+            <div class="field"><label for="receptionistTerminationDate">Contract Termination Date</label><input id="receptionistTerminationDate" type="date"></div>
+          </div>
+          <div class="field"><label for="receptionistNotes">Notes</label><textarea id="receptionistNotes" rows="4" placeholder="Employment, assignment, training, or other relevant notes"></textarea></div>
+        </div>
+        <div class="modal-foot">
+          <button class="btn" type="button" data-close="receptionistModal">Cancel</button>
+          <button id="saveReceptionistBtn" class="btn btn-primary" type="submit">Save Receptionist</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="receptionProfileModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="receptionProfileTitle">
+    <div class="modal-card wide">
+      <div class="modal-head"><h3 id="receptionProfileTitle">Receptionist Profile</h3><button class="btn btn-icon" type="button" data-close="receptionProfileModal" aria-label="Close">×</button></div>
+      <div class="modal-body">
+        <div id="receptionProfileDetails"></div>
+        <div class="panel-actions" style="margin-bottom:14px;display:flex;gap:8px;flex-wrap:wrap;align-items:end">
+          <button id="newDailyEvaluationBtn" class="btn btn-primary" type="button">+ New Daily Evaluation</button>
+          <div class="field" style="margin:0;min-width:180px"><label for="periodExportDate">Report Reference Date</label><input id="periodExportDate" type="date"></div>
+          <button id="exportWeeklyEvaluationBtn" class="btn" type="button">Export Weekly</button>
+          <button id="exportMonthlyEvaluationBtn" class="btn" type="button">Export Monthly</button>
+        </div>
+        <h3 class="section-title">Daily Evaluations and Coaching Records</h3>
+        <div id="evaluationHistory"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="dailyEvaluationModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="dailyEvaluationTitle">
+    <div class="modal-card wide">
+      <div class="modal-head"><h3 id="dailyEvaluationTitle">Daily Evaluation</h3><button class="btn btn-icon" type="button" data-close="dailyEvaluationModal" aria-label="Close">×</button></div>
+      <form id="dailyEvaluationForm">
+        <div class="modal-body">
+          <input id="evaluationId" type="hidden"><input id="evaluationReceptionistId" type="hidden">
+          <div class="row2">
+            <div class="field"><label for="evaluationDate">Evaluation Date</label><input id="evaluationDate" type="date" required></div>
+            <div class="field"><label for="evaluatorName">Evaluator Name</label><input id="evaluatorName" required maxlength="160"></div>
+          </div>
+          <div class="eval-summary"><div><strong>Fault-point grading</strong><div class="person-sub">Enter 1 for each observed fault. Deductions are automatic: Minor 1, Standard 2, Major 5, Critical 10.</div></div><div class="score-circle" id="liveEvaluationScore">100</div><div><strong id="liveEvaluationRating">Excellent</strong><div class="person-sub" id="liveEvaluationDeduction">0 points deducted</div></div></div>
+          <div class="table-wrap"><table class="eval-table"><thead><tr><th>KPI Category / Criterion</th><th>Severity</th><th>Deduction per Fault</th><th>Fault Points</th><th>Total Deduction</th><th>Observation / Evidence</th></tr></thead><tbody id="criteriaBody"></tbody></table></div>
+          <h3 class="section-title">Coaching Record</h3>
+          <div class="field"><label for="evaluationPositive">Positive Observations</label><textarea id="evaluationPositive" rows="2"></textarea></div>
+          <div class="field"><label for="evaluationCoaching">Coaching Discussion / Performance Concerns</label><textarea id="evaluationCoaching" rows="3"></textarea></div>
+          <div class="field"><label for="evaluationActions">Agreed Actions</label><textarea id="evaluationActions" rows="3"></textarea></div>
+          <div class="row2"><div class="field"><label for="evaluationFollowup">Follow-up Date</label><input id="evaluationFollowup" type="date"></div><div class="field"><label for="evaluationEmployeeComments">Receptionist Comments</label><textarea id="evaluationEmployeeComments" rows="2"></textarea></div></div>
+          <div class="ack-row"><div class="field"><label for="evaluationAcknowledgement">Acknowledgement Status</label><select id="evaluationAcknowledgement"><option value="Pending">Pending</option><option value="Acknowledged">Acknowledged</option><option value="Declined to acknowledge">Declined to acknowledge</option></select></div><div class="field"><label for="evaluationAcknowledgedAt">Date Acknowledged</label><input id="evaluationAcknowledgedAt" type="date"></div></div>
+        </div>
+        <div class="modal-foot"><button class="btn" type="button" data-close="dailyEvaluationModal">Cancel</button><button id="saveDailyEvaluationBtn" class="btn btn-primary" type="submit">Save Evaluation</button></div>
+      </form>
+    </div>
+  </div>
+
+  <div id="typesModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="typesModalTitle">
+    <div class="modal-card">
+      <div class="modal-head"><h3 id="typesModalTitle">Manage Maintenance Task Types</h3><button class="btn btn-icon" type="button" data-close="typesModal" aria-label="Close">×</button></div>
+      <div class="modal-body">
+        <div class="row2">
+          <input id="newTypeName" maxlength="120" placeholder="New task type" aria-label="New task type">
+          <button id="addTypeBtn" class="btn btn-primary" type="button">Add Task Type</button>
+        </div>
+        <div id="typesList" style="margin-top:16px"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      'use strict';
+
+      const SUPABASE_URL = 'https://vgpseyawqtptulhmwnpz.supabase.co';
+      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZncHNleWF3cXRwdHVsaG13bnB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ1MDU5NDcsImV4cCI6MjEwMDA4MTk0N30.-3PxVDkKmZhuEa8Q5jf7WssU8SLc9_rGALWQ0NyhzOw';
+
+      const $ = id => document.getElementById(id);
+      const REQUIRED_TABLES = ['project_tasks', 'project_task_updates', 'maintenance_task_types', 'maintenance_records', 'receptionists', 'receptionist_evaluations', 'receptionist_faults'];
+
+      let sb = null;
+      let projectTasks = [];
+      let maintenanceRecords = [];
+      let taskTypes = [];
+      let receptionists = [];
+      let receptionistEvaluations = [];
+      let receptionistFaults = [];
+      let activeReceptionistId = null;
+      let activeMaintenanceType = '';
+      let draggedTaskId = null;
+      let suppressTaskClickUntil = 0;
+      let authSubscription = null;
+      let currentSession = null;
+      let activeTaskUpdates = [];
+
+      const KPI_CRITERIA = [
+        ['Professional Presentation, Guest and Internal Communication',10,'Proper attire and grooming','Minor',1],
+        ['Professional Presentation, Guest and Internal Communication',10,'Attentive to reception livestream','Standard',2],
+        ['Professional Presentation, Guest and Internal Communication',10,'Every guest greeted professionally','Standard',2],
+        ['Professional Presentation, Guest and Internal Communication',10,'Internal requests answered completely and on time','Minor',1],
+        ['Professional Presentation, Guest and Internal Communication',10,'Important email, SMS, phone and front-desk communication documented','Standard',2],
+        ['Check-in Speed and Accuracy',10,'Complete-document check-in within 5 minutes','Standard',2],
+        ['Check-in Speed and Accuracy',10,'Incomplete-document check-in within 7 minutes','Standard',2],
+        ['Check-in Speed and Accuracy',10,'Check-in information accurate and delays documented','Standard',2],
+        ['Dashboard Management',10,'Dashboard updated during the shift','Standard',2],
+        ['Dashboard Management',10,'No duplicate or missing critical records','Standard',2],
+        ['Dashboard Management',10,'Announcements checked and followed','Minor',1],
+        ['Complaint Handling and Ownership',15,'Complaint managed by one clearly identified owner','Major',5],
+        ['Complaint Handling and Ownership',15,'Reasonable recovery options exhausted before escalation','Major',5],
+        ['Complaint Handling and Ownership',15,'Previous guest incidents checked before escalation','Major',5],
+        ['Complaint Handling and Ownership',15,'Decision-ready escalation report complete','Major',5],
+        ['Complaint Handling and Ownership',15,'No unauthorised voucher, upgrade or refund promise','Critical',10],
+        ['De-escalation and Problem-Solving',15,'Calm, respectful and non-confrontational communication','Major',5],
+        ['De-escalation and Problem-Solving',15,'One complaint handled at a time with clear next steps','Standard',2],
+        ['De-escalation and Problem-Solving',15,'Safety risks prioritised and escalated immediately','Critical',10],
+        ['De-escalation and Problem-Solving',15,'Follow-up completed until resolution or acknowledged handover','Major',5],
+        ['Guest Reviews and Satisfaction',15,'Guest satisfaction check completed','Minor',1],
+        ['Guest Reviews and Satisfaction',15,'Satisfied guest invited to leave an honest review','Minor',1],
+        ['Guest Reviews and Satisfaction',15,'Negative feedback documented and actioned','Standard',2],
+        ['Cleaning Monitoring',15,'Cleaner arrival and supplies checked','Standard',2],
+        ['Cleaning Monitoring',15,'Required room, bathroom and fridge evidence received','Major',5],
+        ['Cleaning Monitoring',15,'Cleaning photos and videos scrutinised and corrections requested','Major',5],
+        ['Cleaning Monitoring',15,'Cleaner called after 15 minutes without a response','Standard',2],
+        ['Maintenance Management',10,'Maintenance issue logged completely and without duplication','Standard',2],
+        ['Maintenance Management',10,'Issue followed up with responsible person and completion time','Major',5],
+        ['Maintenance Management',10,'Completion verified before closure','Major',5],
+        ['Maintenance Management',10,'Urgent maintenance reported immediately','Critical',10]
+      ].map((row,index)=>({key:`criterion_${index+1}`,category:row[0],weight:row[1],label:row[2],severity:row[3],deduction:row[4]}));
+
+
+      const today = () => {
+        const now = new Date();
+        const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+        return local.toISOString().slice(0, 10);
+      };
+
+      const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, char => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+      })[char]);
+
+      const formatDate = value => {
+        if (!value) return '-';
+        const parts = String(value).split('-');
+        return parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : String(value);
+      };
+
+      const trimOrNull = value => {
+        const result = String(value ?? '').trim();
+        return result || null;
+      };
+
+      function toast(message, type = 'info') {
+        const item = document.createElement('div');
+        item.className = `toast ${type}`;
+        item.textContent = message;
+        $('toastStack').appendChild(item);
+        window.setTimeout(() => item.remove(), 4500);
+      }
+
+      function setConnection(text, state = '') {
+        const el = $('connectionStatus');
+        el.textContent = text;
+        el.className = `connection ${state}`.trim();
+      }
+
+      function setButtonBusy(button, busy, busyText) {
+        if (!button) return;
+        if (busy) {
+          button.dataset.originalText = button.textContent;
+          button.textContent = busyText;
+          button.disabled = true;
+        } else {
+          button.textContent = button.dataset.originalText || button.textContent;
+          button.disabled = false;
+          delete button.dataset.originalText;
+        }
+      }
+
+      function closeModal(id) {
+        $(id).classList.add('hidden');
+      }
+
+      function openModal(id) {
+        $(id).classList.remove('hidden');
+      }
+
+      async function requireSuccess(queryPromise, fallbackMessage) {
+        const result = await queryPromise;
+        if (result.error) {
+          console.error(result.error);
+          throw new Error(result.error.message || fallbackMessage);
+        }
+        return result.data;
+      }
+
+      function showLogin() {
+        currentSession = null;
+        $('loginView').classList.remove('hidden');
+        $('appView').classList.add('hidden');
+        $('loginMsg').textContent = '';
+        setConnection('Signed out');
+      }
+
+      async function showApp(session) {
+        currentSession = session;
+        $('loginView').classList.add('hidden');
+        $('appView').classList.remove('hidden');
+        $('userEmail').textContent = session.user?.email || 'Signed-in user';
+        await loadAll();
+      }
+
+      async function loadAll() {
+        setConnection('Loading Supabase…');
+        try {
+          const [projects, types, records, receptionistRows, evaluationRows, faultRows] = await Promise.all([
+            requireSuccess(sb.from('project_tasks').select('*').order('created_at', { ascending: true }), 'Could not load project tasks.'),
+            requireSuccess(sb.from('maintenance_task_types').select('*').order('sort_order', { ascending: true }).order('name', { ascending: true }), 'Could not load task types.'),
+            requireSuccess(sb.from('maintenance_records').select('*, maintenance_task_types(name)').order('scheduled_date', { ascending: true }).order('scheduled_time', { ascending: true }), 'Could not load maintenance records.'),
+            requireSuccess(sb.from('receptionists').select('*').order('full_name', { ascending: true }), 'Could not load receptionist records.'),
+            requireSuccess(sb.from('receptionist_evaluations').select('*').order('evaluation_date', { ascending: false }).order('created_at', { ascending: false }), 'Could not load receptionist evaluations.'),
+            requireSuccess(sb.from('receptionist_faults').select('*').order('created_at', { ascending: true }), 'Could not load evaluation faults.')
+          ]);
+
+          projectTasks = projects || [];
+          taskTypes = types || [];
+          receptionists = receptionistRows || [];
+          receptionistEvaluations = evaluationRows || [];
+          receptionistFaults = faultRows || [];
+          maintenanceRecords = (records || []).map(record => ({
+            ...record,
+            task_type_name: record.maintenance_task_types?.name || 'Deleted task type'
+          }));
+
+          if (activeMaintenanceType && !taskTypes.some(type => type.id === activeMaintenanceType)) {
+            activeMaintenanceType = '';
+          }
+
+          setConnection('Supabase connected', 'ok');
+          renderAll();
+        } catch (error) {
+          setConnection('Database setup required', 'error');
+          toast(`Could not load the workspace: ${error.message}`, 'error');
+          renderAll();
+        }
+      }
+
+      function renderAll() {
+        renderProject();
+        renderTypes();
+        renderMaintenance();
+        renderReceptionists();
+      }
+
+
+      function receptionistFiltered() {
+        const query = $('receptionSearch').value.trim().toLowerCase();
+        const status = $('receptionStatusFilter').value;
+        const property = $('receptionPropertyFilter').value;
+        return receptionists.filter(person => {
+          const haystack = [person.full_name, person.email, person.phone, person.primary_property, person.employment_type, person.notes]
+            .map(value => value || '').join(' ').toLowerCase();
+          const statusMatch = status === 'all' || (status === 'archived' ? person.is_archived : !person.is_archived);
+          return statusMatch && (!query || haystack.includes(query)) && (!property || person.primary_property === property);
+        });
+      }
+
+      function contractEndingSoon(person) {
+        if (person.is_archived || !person.contract_termination_date) return false;
+        const current = today();
+        const limit = new Date(`${current}T00:00:00`);
+        limit.setDate(limit.getDate() + 30);
+        return person.contract_termination_date >= current && person.contract_termination_date <= limit.toISOString().slice(0, 10);
+      }
+
+      function renderReceptionists() {
+        if (!$('receptionBody')) return;
+        const filtered = receptionistFiltered();
+        $('receptionTotal').textContent = receptionists.length;
+        $('receptionActive').textContent = receptionists.filter(person => !person.is_archived).length;
+        $('receptionArchived').textContent = receptionists.filter(person => person.is_archived).length;
+        $('receptionEndingSoon').textContent = receptionists.filter(contractEndingSoon).length;
+        fillOptions('receptionPropertyFilter', receptionists.map(person => person.primary_property), 'All Properties');
+
+        if (!filtered.length) {
+          $('receptionBody').innerHTML = '<tr><td class="table-empty" colspan="8">No receptionist records match the selected filters.</td></tr>';
+          return;
+        }
+
+        $('receptionBody').innerHTML = filtered.map(person => {
+          const ending = contractEndingSoon(person);
+          const statusClass = person.is_archived ? 'status-archived' : (ending ? 'status-ending' : 'status-active');
+          const statusText = person.is_archived ? 'Archived' : (ending ? 'Ending Soon' : 'Active');
+          return `<tr>
+            <td><button class="profile-link" type="button" data-reception-profile="${person.id}">${escapeHtml(person.full_name)}</button><div class="person-sub">${escapeHtml(person.employment_type || 'Not specified')}</div></td>
+            <td>${escapeHtml(person.email || '-')}<div class="person-sub">${escapeHtml(person.phone || '')}</div></td>
+            <td>${escapeHtml(person.primary_property || '-')}</td>
+            <td>${escapeHtml(formatDate(person.start_date))}</td>
+            <td>${escapeHtml(formatDate(person.contract_termination_date))}</td>
+            <td><span class="badge ${statusClass}">${statusText}</span>${person.archived_at ? `<div class="person-sub">${escapeHtml(formatDate(String(person.archived_at).slice(0, 10)))}</div>` : ''}</td>
+            <td>${escapeHtml(person.notes || '-')}</td>
+            <td><div class="row-actions">
+              <button class="btn" type="button" data-reception-edit="${person.id}">Edit</button>
+              <button class="btn ${person.is_archived ? '' : 'btn-danger'}" type="button" data-reception-archive="${person.id}">${person.is_archived ? 'Restore' : 'Archive'}</button>
+            </div></td>
+          </tr>`;
+        }).join('');
+
+        document.querySelectorAll('[data-reception-profile]').forEach(button => button.addEventListener('click', () => openReceptionProfile(button.dataset.receptionProfile)));
+        document.querySelectorAll('[data-reception-edit]').forEach(button => button.addEventListener('click', () => openReceptionist(button.dataset.receptionEdit)));
+        document.querySelectorAll('[data-reception-archive]').forEach(button => button.addEventListener('click', () => toggleReceptionistArchive(button.dataset.receptionArchive)));
+      }
+
+      function openReceptionist(id = '') {
+        const person = receptionists.find(item => item.id === id);
+        $('receptionistForm').reset();
+        $('receptionistId').value = person?.id || '';
+        $('receptionistModalTitle').textContent = person ? 'Edit Receptionist' : 'Add Receptionist';
+        $('receptionistEmploymentType').value = person?.employment_type || 'Full-time';
+        $('receptionistStartDate').value = person?.start_date || today();
+        if (person) {
+          $('receptionistName').value = person.full_name || '';
+          $('receptionistEmail').value = person.email || '';
+          $('receptionistPhone').value = person.phone || '';
+          $('receptionistProperty').value = person.primary_property || '';
+          $('receptionistTerminationDate').value = person.contract_termination_date || '';
+          $('receptionistNotes').value = person.notes || '';
+        }
+        openModal('receptionistModal');
+        window.setTimeout(() => $('receptionistName').focus(), 0);
+      }
+
+      async function toggleReceptionistArchive(id) {
+        const person = receptionists.find(item => item.id === id);
+        if (!person) return;
+        const action = person.is_archived ? 'restore' : 'archive';
+        if (!window.confirm(`${action === 'archive' ? 'Archive' : 'Restore'} ${person.full_name}?`)) return;
+        try {
+          await requireSuccess(
+            sb.from('receptionists').update({
+              is_archived: !person.is_archived,
+              archived_at: person.is_archived ? null : new Date().toISOString(),
+              archived_by: person.is_archived ? null : currentSession?.user?.id || null
+            }).eq('id', id).select('id').single(),
+            `Could not ${action} receptionist.`
+          );
+          toast(`Receptionist ${action === 'archive' ? 'archived' : 'restored'}.`, 'success');
+          await loadAll();
+        } catch (error) {
+          toast(error.message, 'error');
+        }
+      }
+
+
+      function ratingForScore(score) {
+        if (score >= 95) return 'Excellent';
+        if (score >= 85) return 'Good';
+        if (score >= 75) return 'Needs Improvement';
+        if (score >= 65) return 'Unsatisfactory';
+        return 'Critical';
+      }
+
+      function evaluationFaults(evaluationId) { return receptionistFaults.filter(item => item.evaluation_id === evaluationId); }
+
+      function calculateEvaluation(faults) {
+        const categoryDeductions = {};
+        KPI_CRITERIA.forEach(item => { if (!(item.category in categoryDeductions)) categoryDeductions[item.category] = 0; });
+        faults.forEach(fault => { categoryDeductions[fault.category] = (categoryDeductions[fault.category] || 0) + Number(fault.total_deduction || 0); });
+        const categoryScores = {};
+        let total = 0;
+        [...new Map(KPI_CRITERIA.map(item => [item.category,item.weight])).entries()].forEach(([category,weight]) => {
+          categoryScores[category] = Math.max(0, weight - (categoryDeductions[category] || 0));
+          total += categoryScores[category];
+        });
+        return { score: Math.max(0, Math.round(total * 100) / 100), categoryScores, totalDeduction: Math.max(0, 100-total) };
+      }
+
+      function liveFaultRows() {
+        return KPI_CRITERIA.map(item => {
+          const input = document.querySelector(`[data-fault-count="${item.key}"]`);
+          const note = document.querySelector(`[data-fault-note="${item.key}"]`);
+          const count = Math.max(0, Number(input?.value || 0));
+          return { ...item, fault_count: count, notes: note?.value.trim() || null, total_deduction: count * item.deduction };
+        }).filter(item => item.fault_count > 0 || item.notes);
+      }
+
+      function updateLiveEvaluationScore() {
+        const result = calculateEvaluation(liveFaultRows());
+        $('liveEvaluationScore').textContent = result.score.toFixed(result.score % 1 ? 1 : 0);
+        $('liveEvaluationRating').textContent = ratingForScore(result.score);
+        $('liveEvaluationDeduction').textContent = `${result.totalDeduction.toFixed(result.totalDeduction % 1 ? 1 : 0)} points deducted`;
+        KPI_CRITERIA.forEach(item => {
+          const count = Number(document.querySelector(`[data-fault-count="${item.key}"]`)?.value || 0);
+          const cell = document.querySelector(`[data-fault-total="${item.key}"]`);
+          if (cell) cell.textContent = count * item.deduction;
+        });
+      }
+
+      function renderCriteria(existingFaults = []) {
+        const byKey = Object.fromEntries(existingFaults.map(item => [item.criterion_key,item]));
+        let lastCategory = '';
+        $('criteriaBody').innerHTML = KPI_CRITERIA.map(item => {
+          const fault = byKey[item.key] || {};
+          const heading = item.category !== lastCategory ? `<tr><td colspan="6" style="background:#eef5fb;font-weight:850">${escapeHtml(item.category)} <span class="person-sub">(${item.weight}% maximum)</span></td></tr>` : '';
+          lastCategory = item.category;
+          return `${heading}<tr><td><div class="criterion-title">${escapeHtml(item.label)}</div></td><td class="severity-${item.severity.toLowerCase()}">${item.severity}</td><td>${item.deduction}</td><td><input type="number" min="0" step="1" value="${Number(fault.fault_count || 0)}" data-fault-count="${item.key}" aria-label="Fault points for ${escapeHtml(item.label)}"></td><td><strong data-fault-total="${item.key}">${Number(fault.total_deduction || 0)}</strong></td><td><input style="width:100%" value="${escapeHtml(fault.notes || '')}" data-fault-note="${item.key}" placeholder="Date/time and observation or evidence"></td></tr>`;
+        }).join('');
+        document.querySelectorAll('[data-fault-count],[data-fault-note]').forEach(el => el.addEventListener('input', updateLiveEvaluationScore));
+        updateLiveEvaluationScore();
+      }
+
+      async function openReceptionProfile(id) {
+        const person = receptionists.find(item => item.id === id); if (!person) return;
+        activeReceptionistId = id;
+        $('periodExportDate').value = $('periodExportDate').value || today();
+        $('receptionProfileTitle').textContent = person.full_name;
+        const rows = receptionistEvaluations.filter(item => item.receptionist_id === id);
+        const avg = rows.length ? rows.reduce((sum,item)=>sum+Number(item.total_score || 0),0)/rows.length : null;
+        $('receptionProfileDetails').innerHTML = `<div class="profile-grid"><div class="profile-card"><small>Email</small><strong>${escapeHtml(person.email||'-')}</strong></div><div class="profile-card"><small>Phone / WhatsApp</small><strong>${escapeHtml(person.phone||'-')}</strong></div><div class="profile-card"><small>Property / Assignment</small><strong>${escapeHtml(person.primary_property||'-')}</strong></div><div class="profile-card"><small>Employment Type</small><strong>${escapeHtml(person.employment_type||'-')}</strong></div><div class="profile-card"><small>Starting Date</small><strong>${escapeHtml(formatDate(person.start_date))}</strong></div><div class="profile-card"><small>Contract Termination</small><strong>${escapeHtml(formatDate(person.contract_termination_date))}</strong></div><div class="profile-card"><small>Evaluations</small><strong>${rows.length}</strong></div><div class="profile-card"><small>Average Score</small><strong>${avg===null?'-':avg.toFixed(1)+'%'}</strong></div></div>`;
+        renderEvaluationHistory(id);
+        openModal('receptionProfileModal');
+      }
+
+      function renderEvaluationHistory(receptionistId) {
+        const rows = receptionistEvaluations.filter(item => item.receptionist_id === receptionistId);
+        if (!rows.length) { $('evaluationHistory').innerHTML='<div class="table-empty">No daily evaluations have been recorded.</div>'; return; }
+        $('evaluationHistory').innerHTML = rows.map(item => `<div class="history-card"><div><h4>${escapeHtml(formatDate(item.evaluation_date))} — ${escapeHtml(ratingForScore(Number(item.total_score||0)))}</h4><div class="person-sub">Score: <strong>${Number(item.total_score||0).toFixed(1)}%</strong> · Evaluator: ${escapeHtml(item.evaluator_name||'-')} · Acknowledgement: ${escapeHtml(item.acknowledgement_status||'Pending')}</div><div style="margin-top:7px">${escapeHtml(item.coaching_notes||item.positive_observations||'No coaching notes recorded.')}</div></div><div class="history-actions"><button class="btn" type="button" data-eval-edit="${item.id}">View / Edit</button><button class="btn" type="button" data-eval-export="${item.id}">Export Word</button></div></div>`).join('');
+        document.querySelectorAll('[data-eval-edit]').forEach(btn=>btn.addEventListener('click',()=>openDailyEvaluation(btn.dataset.evalEdit)));
+        document.querySelectorAll('[data-eval-export]').forEach(btn=>btn.addEventListener('click',()=>exportEvaluationWord(btn.dataset.evalExport)));
+      }
+
+      function openDailyEvaluation(evaluationId='') {
+        const evaluation = receptionistEvaluations.find(item=>item.id===evaluationId);
+        const receptionistId = evaluation?.receptionist_id || activeReceptionistId;
+        const person = receptionists.find(item=>item.id===receptionistId); if(!person) return;
+        $('dailyEvaluationForm').reset();
+        $('evaluationId').value = evaluation?.id || '';
+        $('evaluationReceptionistId').value = receptionistId;
+        $('dailyEvaluationTitle').textContent = `${person.full_name} — Daily Evaluation`;
+        $('evaluationDate').value = evaluation?.evaluation_date || today();
+        $('evaluatorName').value = evaluation?.evaluator_name || currentSession?.user?.email || '';
+        $('evaluationPositive').value = evaluation?.positive_observations || '';
+        $('evaluationCoaching').value = evaluation?.coaching_notes || '';
+        $('evaluationActions').value = evaluation?.agreed_actions || '';
+        $('evaluationFollowup').value = evaluation?.follow_up_date || '';
+        $('evaluationEmployeeComments').value = evaluation?.employee_comments || '';
+        $('evaluationAcknowledgement').value = evaluation?.acknowledgement_status || 'Pending';
+        $('evaluationAcknowledgedAt').value = evaluation?.acknowledged_at ? String(evaluation.acknowledged_at).slice(0,10) : '';
+        renderCriteria(evaluation ? evaluationFaults(evaluation.id) : []);
+        openModal('dailyEvaluationModal');
+      }
+
+
+      function startOfWeek(dateString) {
+        const d = new Date(`${dateString}T00:00:00`);
+        const day = d.getDay();
+        const diff = day === 0 ? -6 : 1 - day;
+        d.setDate(d.getDate() + diff);
+        const localIso = value => `${value.getFullYear()}-${String(value.getMonth()+1).padStart(2,'0')}-${String(value.getDate()).padStart(2,'0')}`;
+        return localIso(d);
+      }
+
+      function endOfWeek(dateString) {
+        const d = new Date(`${startOfWeek(dateString)}T00:00:00`);
+        d.setDate(d.getDate() + 6);
+        return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+      }
+
+      function monthBounds(dateString) {
+        const d = new Date(`${dateString}T00:00:00`);
+        const start = new Date(d.getFullYear(), d.getMonth(), 1);
+        const end = new Date(d.getFullYear(), d.getMonth() + 1, 0);
+        const localIso = value => `${value.getFullYear()}-${String(value.getMonth()+1).padStart(2,'0')}-${String(value.getDate()).padStart(2,'0')}`;
+        return { start: localIso(start), end: localIso(end) };
+      }
+
+      function uniqueNonEmpty(values) {
+        return [...new Set(values.map(value => String(value || '').trim()).filter(Boolean))];
+      }
+
+      function downloadWordHtml(html, filenameBase) {
+        let blob;
+        let extension;
+        if(window.htmlDocx && typeof window.htmlDocx.asBlob==='function'){
+          blob=window.htmlDocx.asBlob(html,{orientation:'portrait',margins:{top:720,right:720,bottom:720,left:720}});
+          extension='docx';
+        }else{
+          blob=new Blob(['\ufeff',html],{type:'application/msword;charset=utf-8'});
+          extension='doc';
+        }
+        const url=URL.createObjectURL(blob);
+        const a=document.createElement('a');
+        a.href=url;
+        a.download=`${filenameBase}.${extension}`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(()=>URL.revokeObjectURL(url),2000);
+        if(extension==='doc') toast('Word report exported using offline-compatible format.','success');
+      }
+
+      function exportPeriodEvaluationWord(periodType) {
+        const person = receptionists.find(item => item.id === activeReceptionistId);
+        if (!person) return;
+        const referenceDate = $('periodExportDate').value || today();
+        let startDate, endDate, periodLabel;
+        if (periodType === 'weekly') {
+          startDate = startOfWeek(referenceDate);
+          endDate = endOfWeek(referenceDate);
+          periodLabel = `Weekly Evaluation (${formatDate(startDate)} - ${formatDate(endDate)})`;
+        } else {
+          const bounds = monthBounds(referenceDate);
+          startDate = bounds.start;
+          endDate = bounds.end;
+          periodLabel = `Monthly Evaluation (${new Date(`${referenceDate}T00:00:00`).toLocaleDateString(undefined,{month:'long',year:'numeric'})})`;
+        }
+        const evaluations = receptionistEvaluations.filter(item => item.receptionist_id === person.id && item.evaluation_date >= startDate && item.evaluation_date <= endDate).sort((a,b) => a.evaluation_date.localeCompare(b.evaluation_date));
+        if (!evaluations.length) { toast(`No evaluations found for the selected ${periodType === 'weekly' ? 'week' : 'month'}.`, 'error'); return; }
+        const evaluationIds = new Set(evaluations.map(item => item.id));
+        const periodFaults = receptionistFaults.filter(item => evaluationIds.has(item.evaluation_id));
+        const dailyCalculations = evaluations.map(item => ({evaluation:item,calc:calculateEvaluation(evaluationFaults(item.id))}));
+        const finalScore = evaluations.reduce((sum,item)=>sum+Number(item.total_score||0),0) / evaluations.length;
+        const totalDeductions = evaluations.reduce((sum,item)=>sum+Number(item.total_deduction||0),0);
+        const categories = [...new Set(KPI_CRITERIA.map(item => item.category))];
+        const categoryRows = categories.map(category => {
+          const weight = KPI_CRITERIA.find(item => item.category === category)?.weight || 0;
+          const averageEarned = dailyCalculations.reduce((sum,item)=>sum+Number(item.calc.categoryScores[category] ?? weight),0) / dailyCalculations.length;
+          const categoryPercent = weight ? (averageEarned / weight) * 100 : 0;
+          return `<tr><td>${escapeHtml(category)}</td><td>${weight.toFixed(1)}</td><td>${averageEarned.toFixed(2)}</td><td>${categoryPercent.toFixed(1)}%</td></tr>`;
+        }).join('');
+        const groupedFaults = new Map();
+        periodFaults.forEach(fault => {
+          const key = fault.criterion_key;
+          if (!groupedFaults.has(key)) groupedFaults.set(key,{category:fault.category,criterion:fault.criterion_label,severity:fault.severity,count:0,deduction:0,observations:[]});
+          const group = groupedFaults.get(key);
+          group.count += Number(fault.fault_count || 0);
+          group.deduction += Number(fault.total_deduction || 0);
+          if (fault.notes) {
+            const evalItem = receptionistEvaluations.find(item => item.id === fault.evaluation_id);
+            group.observations.push(`${formatDate(evalItem?.evaluation_date)}: ${fault.notes}`);
+          }
+        });
+        const consolidatedFaultRows = groupedFaults.size ? [...groupedFaults.values()].map(group => `<tr><td>${escapeHtml(group.category)}</td><td>${escapeHtml(group.criterion)}</td><td>${escapeHtml(group.severity)}</td><td>${group.count}</td><td>${group.deduction.toFixed(1)}</td><td>${uniqueNonEmpty(group.observations).map(escapeHtml).join('<br>')}</td></tr>`).join('') : '<tr><td colspan="6">No faults recorded during this period.</td></tr>';
+        const dailyRows = evaluations.map(item => `<tr><td>${escapeHtml(formatDate(item.evaluation_date))}</td><td>${Number(item.total_score||0).toFixed(1)}%</td><td>${escapeHtml(ratingForScore(Number(item.total_score||0)))}</td><td>${Number(item.total_deduction||0).toFixed(1)}</td><td>${escapeHtml(item.evaluator_name||'-')}</td><td>${escapeHtml(item.acknowledgement_status||'Pending')}</td></tr>`).join('');
+        const positiveRows = uniqueNonEmpty(evaluations.map(item => item.positive_observations)).map(text => `<li>${escapeHtml(text)}</li>`).join('') || '<li>None recorded.</li>';
+        const coachingRows = uniqueNonEmpty(evaluations.map(item => item.coaching_notes)).map(text => `<li>${escapeHtml(text)}</li>`).join('') || '<li>None recorded.</li>';
+        const actionRows = uniqueNonEmpty(evaluations.map(item => item.agreed_actions)).map(text => `<li>${escapeHtml(text)}</li>`).join('') || '<li>None recorded.</li>';
+        const acknowledgedCount = evaluations.filter(item => item.acknowledgement_status === 'Acknowledged').length;
+        const safeName = person.full_name.replace(/[^a-z0-9]+/gi,'_');
+        const reportType = periodType === 'weekly' ? 'Weekly' : 'Monthly';
+        const html=`<!DOCTYPE html><html><head><meta charset="utf-8"><style>@page{size:8.5in 11in;margin:.65in}body{font-family:Arial,sans-serif;color:#17324d;font-size:10pt;line-height:1.35}h1{font-size:20pt;color:#102d4f;margin:0 0 4px}h2{font-size:13pt;color:#102d4f;margin:18px 0 7px}table{width:100%;border-collapse:collapse;margin:8px 0 12px}th,td{border:1px solid #cfdce7;padding:6px;vertical-align:top}th{background:#eaf3f8;text-align:left}.scorebox{border:2px solid #1f5f8b;padding:12px;margin:12px 0;background:#f4f9fc}.score{font-size:22pt;font-weight:bold}.muted{color:#65798c}.sign{margin-top:28px}ul{margin-top:5px}</style></head><body><h1>${reportType} Receptionist Evaluation Summary</h1><p class="muted">Azzurro Hotels | Reception Management</p><table><tr><th>Receptionist</th><td>${escapeHtml(person.full_name)}</td><th>Reporting Period</th><td>${escapeHtml(periodLabel)}</td></tr><tr><th>Property</th><td>${escapeHtml(person.primary_property||'-')}</td><th>Evaluated Days</th><td>${evaluations.length}</td></tr><tr><th>Starting Date</th><td>${escapeHtml(formatDate(person.start_date))}</td><th>Contract Termination</th><td>${escapeHtml(formatDate(person.contract_termination_date))}</td></tr></table><div class="scorebox"><div class="score">Final Consolidated Score: ${finalScore.toFixed(1)}%</div><div><strong>Final Rating:</strong> ${escapeHtml(ratingForScore(finalScore))}</div><div><strong>Total Fault Deductions Recorded:</strong> ${totalDeductions.toFixed(1)}</div><div><strong>Acknowledged Daily Evaluations:</strong> ${acknowledgedCount} of ${evaluations.length}</div><div class="muted">The final score is the average of all daily scores in the selected period. Repeated criteria and identical coaching text are consolidated.</div></div><h2>Final KPI Category Results</h2><table><tr><th>KPI Category</th><th>Maximum Weight</th><th>Average Points Earned</th><th>Category Result</th></tr>${categoryRows}</table><h2>Daily Results</h2><table><tr><th>Date</th><th>Score</th><th>Rating</th><th>Deductions</th><th>Evaluator</th><th>Acknowledgement</th></tr>${dailyRows}</table><h2>Consolidated Faults and Deductions</h2><table><tr><th>Category</th><th>Criterion</th><th>Severity</th><th>Total Faults</th><th>Total Deduction</th><th>Unique Evidence / Observations</th></tr>${consolidatedFaultRows}</table><h2>Consolidated Coaching Summary</h2><p><strong>Positive observations</strong></p><ul>${positiveRows}</ul><p><strong>Coaching discussions and concerns</strong></p><ul>${coachingRows}</ul><p><strong>Agreed actions</strong></p><ul>${actionRows}</ul><table class="sign"><tr><td style="height:55px">Receptionist Signature:<br><br>________________________________</td><td>Manager Signature:<br><br>________________________________</td></tr><tr><td>Date: ________________________</td><td>Date: ________________________</td></tr></table></body></html>`;
+        downloadWordHtml(html, `${safeName}_${startDate}_to_${endDate}_${reportType}_Evaluation`);
+      }
+
+      async function exportEvaluationWord(evaluationId) {
+        const evaluation = receptionistEvaluations.find(item=>item.id===evaluationId);
+        const person = receptionists.find(item=>item.id===evaluation?.receptionist_id);
+        if(!evaluation||!person) return;
+        const faults=evaluationFaults(evaluationId); const calc=calculateEvaluation(faults);
+        const faultRows = faults.length ? faults.map(f=>`<tr><td>${escapeHtml(f.category)}</td><td>${escapeHtml(f.criterion_label)}</td><td>${escapeHtml(f.severity)}</td><td>${f.fault_count}</td><td>${f.total_deduction}</td><td>${escapeHtml(f.notes||'')}</td></tr>`).join('') : '<tr><td colspan="6">No faults recorded.</td></tr>';
+        const categoryRows=Object.entries(calc.categoryScores).map(([name,score])=>{const weight=KPI_CRITERIA.find(i=>i.category===name)?.weight||0;return `<tr><td>${escapeHtml(name)}</td><td>${weight}%</td><td>${score.toFixed(1)}</td></tr>`}).join('');
+        const html=`<!DOCTYPE html><html><head><meta charset="utf-8"><style>@page{size:8.5in 11in;margin:.7in}body{font-family:Arial,sans-serif;color:#17324d;font-size:10.5pt}h1{font-size:20pt;color:#102d4f;margin-bottom:4px}h2{font-size:13pt;color:#102d4f;margin-top:20px}table{width:100%;border-collapse:collapse;margin:8px 0}th,td{border:1px solid #cfdce7;padding:6px;vertical-align:top}th{background:#eaf3f8}.score{font-size:18pt;font-weight:bold}.muted{color:#65798c}.sign{margin-top:32px}</style></head><body><h1>Daily Receptionist Evaluation and Coaching Record</h1><p class="muted">Azzurro Hotels | Reception Management</p><table><tr><th>Receptionist</th><td>${escapeHtml(person.full_name)}</td><th>Evaluation Date</th><td>${escapeHtml(formatDate(evaluation.evaluation_date))}</td></tr><tr><th>Property</th><td>${escapeHtml(person.primary_property||'-')}</td><th>Evaluator</th><td>${escapeHtml(evaluation.evaluator_name||'-')}</td></tr></table><p class="score">Final Score: ${Number(evaluation.total_score||0).toFixed(1)}% — ${escapeHtml(ratingForScore(Number(evaluation.total_score||0)))}</p><h2>Category Results</h2><table><tr><th>KPI Category</th><th>Maximum Weight</th><th>Points Earned</th></tr>${categoryRows}</table><h2>Faults and Deductions</h2><table><tr><th>Category</th><th>Criterion</th><th>Severity</th><th>Faults</th><th>Deduction</th><th>Evidence / Notes</th></tr>${faultRows}</table><h2>Coaching Record</h2><p><strong>Positive observations:</strong><br>${escapeHtml(evaluation.positive_observations||'-')}</p><p><strong>Coaching discussion / concerns:</strong><br>${escapeHtml(evaluation.coaching_notes||'-')}</p><p><strong>Agreed actions:</strong><br>${escapeHtml(evaluation.agreed_actions||'-')}</p><p><strong>Follow-up date:</strong> ${escapeHtml(formatDate(evaluation.follow_up_date))}</p><p><strong>Receptionist comments:</strong><br>${escapeHtml(evaluation.employee_comments||'-')}</p><p><strong>Acknowledgement status:</strong> ${escapeHtml(evaluation.acknowledgement_status||'Pending')} ${evaluation.acknowledged_at?'— '+escapeHtml(formatDate(String(evaluation.acknowledged_at).slice(0,10))):''}</p><table class="sign"><tr><td style="height:55px">Receptionist Signature:<br><br>________________________________</td><td>Manager Signature:<br><br>________________________________</td></tr><tr><td>Date: ________________________</td><td>Date: ________________________</td></tr></table></body></html>`;
+        const safeName=person.full_name.replace(/[^a-z0-9]+/gi,'_');
+        let blob;
+        let extension;
+        if(window.htmlDocx && typeof window.htmlDocx.asBlob==='function'){
+          blob=window.htmlDocx.asBlob(html,{orientation:'portrait',margins:{top:720,right:720,bottom:720,left:720}});
+          extension='docx';
+        }else{
+          // Offline fallback: Microsoft Word can open this self-contained HTML document.
+          // This avoids relying on the external DOCX library or CDN.
+          blob=new Blob(['\ufeff',html],{type:'application/msword;charset=utf-8'});
+          extension='doc';
+        }
+        const url=URL.createObjectURL(blob);
+        const a=document.createElement('a');
+        a.href=url;
+        a.download=`${safeName}_${evaluation.evaluation_date}_Evaluation.${extension}`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(()=>URL.revokeObjectURL(url),2000);
+        if(extension==='doc') toast('Word report exported using offline-compatible format.','success');
+      }
+
+      function projectFiltered() {
+        const query = $('pmSearch').value.trim().toLowerCase();
+        const sprint = $('sprintFilter').value;
+        const project = $('projectFilter').value;
+        const priority = $('priorityFilter').value;
+
+        return projectTasks.filter(task => {
+          const haystack = [task.title, task.description, task.project_name, task.assignee, task.labels]
+            .map(value => value || '')
+            .join(' ')
+            .toLowerCase();
+          return (!query || haystack.includes(query)) &&
+            (!sprint || task.sprint_name === sprint) &&
+            (!project || task.project_name === project) &&
+            (!priority || task.priority === priority);
+        });
+      }
+
+      function fillOptions(id, values, firstLabel) {
+        const element = $(id);
+        const current = element.value;
+        const cleanValues = [...new Set(values.filter(Boolean).map(value => String(value).trim()).filter(Boolean))]
+          .sort((a, b) => a.localeCompare(b));
+
+        element.replaceChildren();
+        const first = document.createElement('option');
+        first.value = '';
+        first.textContent = firstLabel;
+        element.appendChild(first);
+
+        cleanValues.forEach(value => {
+          const option = document.createElement('option');
+          option.value = value;
+          option.textContent = value;
+          element.appendChild(option);
+        });
+        element.value = cleanValues.includes(current) ? current : '';
+      }
+
+      function renderProject() {
+        const filtered = projectFiltered();
+        const currentDate = today();
+        const dueSoonDate = new Date(`${currentDate}T00:00:00`);
+        dueSoonDate.setDate(dueSoonDate.getDate() + 7);
+        const dueSoonIso = dueSoonDate.toISOString().slice(0, 10);
+
+        $('pmTotal').textContent = projectTasks.length;
+        $('pmBacklog').textContent = projectTasks.filter(task => task.status === 'Backlog').length;
+        $('pmProgress').textContent = projectTasks.filter(task => task.status === 'In Progress').length;
+        $('pmDone').textContent = projectTasks.filter(task => task.status === 'Done').length;
+        $('pmDue').textContent = projectTasks.filter(task =>
+          task.due_date && task.status !== 'Done' && task.due_date >= currentDate && task.due_date <= dueSoonIso
+        ).length;
+
+        fillOptions('sprintFilter', projectTasks.map(task => task.sprint_name), 'All Sprints');
+        fillOptions('projectFilter', projectTasks.map(task => task.project_name), 'All Projects');
+
+        const columns = ['Backlog', 'To Do', 'In Progress', 'Done'];
+        $('kanbanBoard').innerHTML = columns.map(status => {
+          const tasks = filtered.filter(task => task.status === status);
+          const cards = tasks.length ? tasks.map(taskCardHtml).join('') : '<div class="column-empty">No tasks</div>';
+          return `<section class="column"><div class="column-head">${escapeHtml(status)}<span class="count">${tasks.length}</span></div><div class="dropzone" data-status="${escapeHtml(status)}">${cards}</div></section>`;
+        }).join('');
+
+        document.querySelectorAll('.task-card').forEach(card => {
+          card.addEventListener('dragstart', event => {
+            draggedTaskId = card.dataset.id;
+            event.dataTransfer.effectAllowed = 'move';
+            event.dataTransfer.setData('text/plain', draggedTaskId);
+          });
+          card.addEventListener('dragend', () => {
+            suppressTaskClickUntil = Date.now() + 250;
+            draggedTaskId = null;
+            document.querySelectorAll('.dropzone').forEach(zone => zone.classList.remove('drag-over'));
+          });
+          card.addEventListener('click', () => {
+            if (Date.now() < suppressTaskClickUntil) return;
+            openProjectTask(card.dataset.id);
+          });
+        });
+
+        document.querySelectorAll('.dropzone').forEach(zone => {
+          zone.addEventListener('dragover', event => {
+            event.preventDefault();
+            event.dataTransfer.dropEffect = 'move';
+            zone.classList.add('drag-over');
+          });
+          zone.addEventListener('dragleave', event => {
+            if (!zone.contains(event.relatedTarget)) zone.classList.remove('drag-over');
+          });
+          zone.addEventListener('drop', async event => {
+            event.preventDefault();
+            zone.classList.remove('drag-over');
+            const id = event.dataTransfer.getData('text/plain') || draggedTaskId;
+            const task = projectTasks.find(item => item.id === id);
+            if (!id || !task || task.status === zone.dataset.status) return;
+
+            try {
+              await requireSuccess(
+                sb.from('project_tasks').update({ status: zone.dataset.status }).eq('id', id).select('id').single(),
+                'Could not move task.'
+              );
+              toast('Task status updated.', 'success');
+              await loadAll();
+            } catch (error) {
+              toast(error.message, 'error');
+            }
+          });
+        });
+      }
+
+      function taskCardHtml(task) {
+        const labels = String(task.labels || '').split(',').map(value => value.trim()).filter(Boolean);
+        const priority = task.priority || 'Medium';
+        const priorityClass = ['Critical', 'High', 'Medium', 'Low'].includes(priority) ? priority.toLowerCase() : 'medium';
+        return `<article class="task-card" draggable="true" data-id="${escapeHtml(task.id)}">
+          <div class="task-top"><div class="task-title">${escapeHtml(task.title)}</div><span class="pill p-${priorityClass}">${escapeHtml(priority)}</span></div>
+          <div class="task-meta">
+            <span>${escapeHtml(task.project_name || 'No project')}${task.sprint_name ? ` • ${escapeHtml(task.sprint_name)}` : ''}</span>
+            <span>${escapeHtml(task.assignee || 'Unassigned')}${task.due_date ? ` • Due ${formatDate(task.due_date)}` : ''}</span>
+          </div>
+          ${labels.map(label => `<span class="label">${escapeHtml(label)}</span>`).join('')}
+        </article>`;
+      }
+
+      function openProjectTask(id = '') {
+        const task = projectTasks.find(item => item.id === id);
+        $('projectTaskForm').reset();
+        $('projectTaskId').value = task?.id || '';
+        $('taskModalTitle').textContent = task ? 'Edit Project Task' : 'Add Project Task';
+        $('deleteProjectTaskBtn').classList.toggle('hidden', !task);
+
+        if (task) {
+          $('projectTaskTitle').value = task.title || '';
+          $('projectTaskDescription').value = task.description || '';
+          $('projectName').value = task.project_name || '';
+          $('sprintName').value = task.sprint_name || '';
+          $('projectTaskStatus').value = task.status || 'Backlog';
+          $('projectTaskPriority').value = task.priority || 'Medium';
+          $('projectTaskAssignee').value = task.assignee || '';
+          $('projectTaskDue').value = task.due_date || '';
+          $('projectTaskLabels').value = task.labels || '';
+        }
+        $('taskUpdateNote').value = '';
+        $('taskActivitySection').classList.toggle('hidden', !task);
+        activeTaskUpdates = [];
+        renderTaskUpdates();
+        openModal('taskModal');
+        if (task) loadTaskUpdates(task.id);
+        window.setTimeout(() => $('projectTaskTitle').focus(), 0);
+      }
+
+      function formatDateTime(value) {
+        if (!value) return '-';
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return String(value);
+        return new Intl.DateTimeFormat('en-AU', {
+          day: '2-digit', month: 'short', year: 'numeric',
+          hour: '2-digit', minute: '2-digit', second: '2-digit',
+          hour12: true
+        }).format(date);
+      }
+
+      function renderTaskUpdates() {
+        const list = $('taskActivityList');
+        if (!activeTaskUpdates.length) {
+          list.innerHTML = '<div class="activity-empty">No updates have been added yet.</div>';
+          return;
+        }
+        list.innerHTML = activeTaskUpdates.map(update => `
+          <article class="activity-item">
+            <div class="activity-meta">
+              <strong>${escapeHtml(update.author_email || 'Signed-in user')}</strong>
+              <span>${escapeHtml(formatDateTime(update.created_at))}</span>
+            </div>
+            <div class="activity-note">${escapeHtml(update.note)}</div>
+          </article>`).join('');
+      }
+
+      async function loadTaskUpdates(taskId) {
+        activeTaskUpdates = [];
+        renderTaskUpdates();
+        if (!taskId) return;
+        try {
+          activeTaskUpdates = await requireSuccess(
+            sb.from('project_task_updates').select('*').eq('task_id', taskId).order('created_at', { ascending: false }),
+            'Could not load task updates.'
+          ) || [];
+          renderTaskUpdates();
+        } catch (error) {
+          toast(error.message, 'error');
+        }
+      }
+
+      function renderTypes() {
+        const currentSelected = $('maintenanceType').value;
+        $('maintenanceType').replaceChildren();
+
+        if (!taskTypes.length) {
+          const option = document.createElement('option');
+          option.value = '';
+          option.textContent = 'Add a task type first';
+          $('maintenanceType').appendChild(option);
+          $('maintenanceType').disabled = true;
+          $('saveMaintenanceBtn').disabled = true;
+        } else {
+          $('maintenanceType').disabled = false;
+          $('saveMaintenanceBtn').disabled = false;
+          taskTypes.forEach(type => {
+            const option = document.createElement('option');
+            option.value = type.id;
+            option.textContent = type.name;
+            $('maintenanceType').appendChild(option);
+          });
+          $('maintenanceType').value = taskTypes.some(type => type.id === currentSelected) ? currentSelected : taskTypes[0].id;
+        }
+
+        if (!taskTypes.length) {
+          $('typesList').innerHTML = '<p class="muted">No task types have been added.</p>';
+          return;
+        }
+
+        $('typesList').innerHTML = taskTypes.map(type => `
+          <div class="type-row">
+            <input class="type-edit" maxlength="120" data-id="${escapeHtml(type.id)}" value="${escapeHtml(type.name)}" aria-label="Task type name">
+            <button class="btn save-type" type="button" data-id="${escapeHtml(type.id)}">Save</button>
+            <button class="btn btn-danger delete-type" type="button" data-id="${escapeHtml(type.id)}">Delete</button>
+          </div>
+        `).join('');
+
+        document.querySelectorAll('.save-type').forEach(button => {
+          button.addEventListener('click', async () => {
+            const input = document.querySelector(`.type-edit[data-id="${CSS.escape(button.dataset.id)}"]`);
+            const name = input.value.trim();
+            if (!name) {
+              toast('Task type name cannot be empty.', 'error');
+              return;
+            }
+            setButtonBusy(button, true, 'Saving…');
+            try {
+              await requireSuccess(
+                sb.from('maintenance_task_types').update({ name }).eq('id', button.dataset.id).select('id').single(),
+                'Could not rename task type.'
+              );
+              toast('Task type updated.', 'success');
+              await loadAll();
+            } catch (error) {
+              toast(error.message, 'error');
+            } finally {
+              setButtonBusy(button, false);
+            }
+          });
+        });
+
+        document.querySelectorAll('.delete-type').forEach(button => {
+          button.addEventListener('click', async () => {
+            const type = taskTypes.find(item => item.id === button.dataset.id);
+            if (!type || !window.confirm(`Delete "${type.name}"? This is only possible when it has no maintenance records.`)) return;
+            setButtonBusy(button, true, 'Deleting…');
+            try {
+              await requireSuccess(
+                sb.from('maintenance_task_types').delete().eq('id', button.dataset.id).select('id').single(),
+                'Could not delete task type.'
+              );
+              toast('Task type deleted.', 'success');
+              await loadAll();
+            } catch (error) {
+              toast(error.message, 'error');
+            } finally {
+              setButtonBusy(button, false);
+            }
+          });
+        });
+      }
+
+      function displayMaintenanceStatus(record) {
+        if (record.status === 'Completed') return 'Completed';
+        if (record.scheduled_date && record.scheduled_date < today()) return 'Overdue';
+        return record.status || 'Scheduled';
+      }
+
+      function maintenanceStatusClass(status) {
+        if (status === 'Completed') return 'completed';
+        if (status === 'In Progress') return 'progress';
+        if (status === 'Overdue') return 'overdue';
+        return 'scheduled';
+      }
+
+      function renderMaintenance() {
+        const tabs = [{ id: '', name: 'All Tasks' }, ...taskTypes];
+        $('maintenanceTabs').innerHTML = tabs.map(type => {
+          const count = type.id ? maintenanceRecords.filter(record => record.task_type_id === type.id).length : maintenanceRecords.length;
+          return `<button class="task-tab ${activeMaintenanceType === type.id ? 'active' : ''}" type="button" data-id="${escapeHtml(type.id)}">${escapeHtml(type.name)} (${count})</button>`;
+        }).join('');
+
+        document.querySelectorAll('.task-tab').forEach(button => {
+          button.addEventListener('click', () => {
+            activeMaintenanceType = button.dataset.id;
+            renderMaintenance();
+          });
+        });
+
+        const query = $('maintenanceSearch').value.trim().toLowerCase();
+        const status = $('maintenanceStatusFilter').value;
+        const date = $('maintenanceDateFilter').value;
+        const frequency = $('maintenanceFrequencyFilter').value;
+
+        const rows = maintenanceRecords.filter(record => {
+          const haystack = [record.task_type_name, record.property, record.area, record.assigned_to, record.notes]
+            .map(value => value || '')
+            .join(' ')
+            .toLowerCase();
+          return (!activeMaintenanceType || record.task_type_id === activeMaintenanceType) &&
+            (!query || haystack.includes(query)) &&
+            (!status || displayMaintenanceStatus(record) === status) &&
+            (!date || record.scheduled_date === date) &&
+            (!frequency || record.frequency === frequency);
+        });
+
+        if (!rows.length) {
+          $('maintenanceBody').innerHTML = '<tr><td class="table-empty" colspan="9">No maintenance records found.</td></tr>';
+          return;
+        }
+
+        $('maintenanceBody').innerHTML = rows.map(record => {
+          const statusText = displayMaintenanceStatus(record);
+          return `<tr>
+            <td><b>${formatDate(record.scheduled_date)}</b><div class="muted">${escapeHtml(record.scheduled_time || 'No time')}</div></td>
+            <td><b>${escapeHtml(record.task_type_name)}</b></td>
+            <td><b>${escapeHtml(record.property)}</b><div class="muted">${escapeHtml(record.area || '-')}</div></td>
+            <td>${escapeHtml(record.assigned_to || '-')}</td>
+            <td>${escapeHtml(record.frequency || '-')}</td>
+            <td><span class="badge ${maintenanceStatusClass(statusText)}">${escapeHtml(statusText)}</span></td>
+            <td>${formatDate(record.completed_date)}</td>
+            <td>${escapeHtml(record.notes || '-')}</td>
+            <td><div class="row-actions"><button class="btn edit-maintenance" type="button" data-id="${escapeHtml(record.id)}">Edit</button><button class="btn btn-danger delete-maintenance" type="button" data-id="${escapeHtml(record.id)}">Delete</button></div></td>
+          </tr>`;
+        }).join('');
+
+        document.querySelectorAll('.edit-maintenance').forEach(button => button.addEventListener('click', () => editMaintenance(button.dataset.id)));
+        document.querySelectorAll('.delete-maintenance').forEach(button => button.addEventListener('click', () => deleteMaintenance(button.dataset.id, button)));
+      }
+
+      function resetMaintenance() {
+        $('maintenanceForm').reset();
+        $('maintenanceId').value = '';
+        $('scheduledDate').value = today();
+        $('formTitle').textContent = 'Add Schedule';
+        if (taskTypes.length) $('maintenanceType').value = taskTypes[0].id;
+      }
+
+      function editMaintenance(id) {
+        const record = maintenanceRecords.find(item => item.id === id);
+        if (!record) return;
+        $('maintenanceId').value = record.id;
+        $('maintenanceType').value = record.task_type_id;
+        $('property').value = record.property || '';
+        $('area').value = record.area || '';
+        $('maintenanceAssigned').value = record.assigned_to || '';
+        $('scheduledDate').value = record.scheduled_date || '';
+        $('scheduledTime').value = record.scheduled_time ? String(record.scheduled_time).slice(0, 5) : '';
+        $('frequency').value = record.frequency || 'One-time';
+        $('maintenanceStatus').value = record.status || 'Scheduled';
+        $('completedDate').value = record.completed_date || '';
+        $('maintenanceNotes').value = record.notes || '';
+        $('formTitle').textContent = 'Edit Schedule';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      async function deleteMaintenance(id, button) {
+        if (!window.confirm('Delete this maintenance record?')) return;
+        setButtonBusy(button, true, 'Deleting…');
+        try {
+          await requireSuccess(
+            sb.from('maintenance_records').delete().eq('id', id).select('id').single(),
+            'Could not delete maintenance record.'
+          );
+          toast('Maintenance record deleted.', 'success');
+          if ($('maintenanceId').value === id) resetMaintenance();
+          await loadAll();
+        } catch (error) {
+          toast(error.message, 'error');
+        } finally {
+          setButtonBusy(button, false);
+        }
+      }
+
+      function exportWordReport() {
+        if (!taskTypes.length) {
+          toast('There are no task types to export.', 'error');
+          return;
+        }
+
+        const sections = taskTypes.map((type, index) => {
+          const records = maintenanceRecords.filter(record => record.task_type_id === type.id);
+          const bodyRows = records.length ? records.map(record => `
+            <tr>
+              <td>${escapeHtml(record.property)}</td><td>${escapeHtml(record.area || '-')}</td><td>${escapeHtml(record.assigned_to || '-')}</td>
+              <td>${formatDate(record.scheduled_date)}${record.scheduled_time ? `<br>${escapeHtml(String(record.scheduled_time).slice(0, 5))}` : ''}</td>
+              <td>${escapeHtml(record.frequency || '-')}</td><td>${escapeHtml(displayMaintenanceStatus(record))}</td>
+              <td>${formatDate(record.completed_date)}</td><td>${escapeHtml(record.notes || '-')}</td>
+            </tr>`).join('') : '<tr><td colspan="8" class="empty">No records for this task type.</td></tr>';
+
+          return `<section class="${index ? 'page-break' : ''}"><h1>${escapeHtml(type.name)}</h1><p><strong>Total records:</strong> ${records.length}</p><table><thead><tr><th>Property</th><th>Area</th><th>Assigned</th><th>Scheduled</th><th>Frequency</th><th>Status</th><th>Completed</th><th>Notes</th></tr></thead><tbody>${bodyRows}</tbody></table></section>`;
+        }).join('');
+
+        const generated = new Date().toLocaleString('en-AU');
+        const html = `<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>Alvin's Maintenance Records</title><style>@page{size:A4 landscape;margin:1.2cm}body{font-family:Arial,sans-serif;color:#10253f;font-size:9pt}.report-title{font-size:20pt;margin-bottom:4px}.generated{color:#687b91;margin-bottom:18px}.page-break{page-break-before:always}h1{font-size:16pt;color:#0b7db6;border-bottom:2px solid #0b7db6;padding-bottom:6px}table{width:100%;border-collapse:collapse;table-layout:fixed}th,td{border:1px solid #aab8c5;padding:6px;text-align:left;vertical-align:top;word-wrap:break-word}th{background:#eaf5fb}.empty{text-align:center;color:#687b91;padding:18px}</style></head><body><div class="report-title"><strong>Alvin's Maintenance Records</strong></div><div class="generated">Generated: ${escapeHtml(generated)}</div>${sections}</body></html>`;
+
+        const url = URL.createObjectURL(new Blob(['\ufeff' + html], { type: 'application/msword;charset=utf-8' }));
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'alvins-maintenance-report.doc';
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+      }
+
+      async function init() {
+        if (!window.supabase?.createClient) {
+          $('loginMsg').textContent = 'The application library could not load. Check the internet connection and refresh.';
+          return;
+        }
+
+        sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+          auth: {
+            persistSession: true,
+            autoRefreshToken: true,
+            detectSessionInUrl: true
+          }
+        });
+
+        const { data, error } = await sb.auth.getSession();
+        if (error) {
+          console.error(error);
+          $('loginMsg').textContent = error.message;
+          showLogin();
+        } else if (data.session) {
+          await showApp(data.session);
+        } else {
+          showLogin();
+        }
+
+        const authResult = sb.auth.onAuthStateChange((event, session) => {
+          window.setTimeout(async () => {
+            if (event === 'SIGNED_OUT' || !session) {
+              projectTasks = [];
+              maintenanceRecords = [];
+              taskTypes = [];
+              receptionists = [];
+              receptionistEvaluations = [];
+              receptionistFaults = [];
+              showLogin();
+            } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
+              await showApp(session);
+            }
+          }, 0);
+        });
+        authSubscription = authResult.data.subscription;
+      }
+
+      document.querySelectorAll('.nav-tab').forEach(button => {
+        button.addEventListener('click', () => {
+          document.querySelectorAll('.nav-tab').forEach(item => item.classList.remove('active'));
+          button.classList.add('active');
+          $('dashboardView').classList.toggle('hidden', button.dataset.view !== 'dashboard');
+          $('trackerView').classList.toggle('hidden', button.dataset.view !== 'tracker');
+          $('receptionView').classList.toggle('hidden', button.dataset.view !== 'reception');
+        });
+      });
+
+
+      $('newReceptionistBtn').addEventListener('click', () => openReceptionist());
+      ['receptionSearch', 'receptionStatusFilter', 'receptionPropertyFilter'].forEach(id => {
+        $(id).addEventListener(id === 'receptionSearch' ? 'input' : 'change', renderReceptionists);
+      });
+      $('clearReceptionFilters').addEventListener('click', () => {
+        $('receptionSearch').value = '';
+        $('receptionStatusFilter').value = 'active';
+        $('receptionPropertyFilter').value = '';
+        renderReceptionists();
+      });
+      $('receptionistForm').addEventListener('submit', async event => {
+        event.preventDefault();
+        const button = $('saveReceptionistBtn');
+        const id = $('receptionistId').value;
+        const startDate = $('receptionistStartDate').value;
+        const terminationDate = $('receptionistTerminationDate').value || null;
+        if (terminationDate && terminationDate < startDate) {
+          toast('Contract termination date cannot be before the starting date.', 'error');
+          return;
+        }
+        const payload = {
+          full_name: $('receptionistName').value.trim(),
+          email: trimOrNull($('receptionistEmail').value),
+          phone: trimOrNull($('receptionistPhone').value),
+          primary_property: trimOrNull($('receptionistProperty').value),
+          employment_type: $('receptionistEmploymentType').value,
+          start_date: startDate,
+          contract_termination_date: terminationDate,
+          notes: trimOrNull($('receptionistNotes').value)
+        };
+        setButtonBusy(button, true, 'Saving…');
+        try {
+          if (id) {
+            await requireSuccess(sb.from('receptionists').update(payload).eq('id', id).select('id').single(), 'Could not update receptionist.');
+          } else {
+            await requireSuccess(sb.from('receptionists').insert(payload).select('id').single(), 'Could not create receptionist.');
+          }
+          closeModal('receptionistModal');
+          toast(id ? 'Receptionist updated.' : 'Receptionist added.', 'success');
+          await loadAll();
+        } catch (error) {
+          toast(error.message, 'error');
+        } finally {
+          setButtonBusy(button, false);
+        }
+      });
+
+
+      $('newDailyEvaluationBtn').addEventListener('click', () => openDailyEvaluation());
+      $('exportWeeklyEvaluationBtn').addEventListener('click', () => exportPeriodEvaluationWord('weekly'));
+      $('exportMonthlyEvaluationBtn').addEventListener('click', () => exportPeriodEvaluationWord('monthly'));
+      $('dailyEvaluationForm').addEventListener('submit', async event => {
+        event.preventDefault();
+        const button=$('saveDailyEvaluationBtn'); const id=$('evaluationId').value; const receptionistId=$('evaluationReceptionistId').value;
+        const faults=liveFaultRows(); const calc=calculateEvaluation(faults);
+        const payload={receptionist_id:receptionistId,evaluation_date:$('evaluationDate').value,evaluator_name:$('evaluatorName').value.trim(),total_score:calc.score,total_deduction:calc.totalDeduction,rating:ratingForScore(calc.score),positive_observations:trimOrNull($('evaluationPositive').value),coaching_notes:trimOrNull($('evaluationCoaching').value),agreed_actions:trimOrNull($('evaluationActions').value),follow_up_date:$('evaluationFollowup').value||null,employee_comments:trimOrNull($('evaluationEmployeeComments').value),acknowledgement_status:$('evaluationAcknowledgement').value,acknowledged_at:$('evaluationAcknowledgedAt').value||null,updated_by:currentSession?.user?.id||null};
+        setButtonBusy(button,true,'Saving…');
+        try{
+          let saved;
+          if(id){saved=await requireSuccess(sb.from('receptionist_evaluations').update(payload).eq('id',id).select('id').single(),'Could not update evaluation.'); await requireSuccess(sb.from('receptionist_faults').delete().eq('evaluation_id',id),'Could not replace evaluation faults.');}
+          else{saved=await requireSuccess(sb.from('receptionist_evaluations').insert({...payload,created_by:currentSession?.user?.id||null}).select('id').single(),'Could not create evaluation.');}
+          const evalId=id||saved.id;
+          if(faults.length){await requireSuccess(sb.from('receptionist_faults').insert(faults.map(f=>({evaluation_id:evalId,criterion_key:f.key,category:f.category,category_weight:f.weight,criterion_label:f.label,severity:f.severity,deduction_per_fault:f.deduction,fault_count:f.fault_count,total_deduction:f.total_deduction,notes:f.notes}))), 'Could not save evaluation faults.');}
+          closeModal('dailyEvaluationModal'); toast('Daily evaluation saved and calculated automatically.','success'); await loadAll(); await openReceptionProfile(receptionistId);
+        }catch(error){toast(error.message,'error');}finally{setButtonBusy(button,false);}
+      });
+
+      $('loginForm').addEventListener('submit', async event => {
+        event.preventDefault();
+        const button = $('loginButton');
+        $('loginMsg').textContent = '';
+        setButtonBusy(button, true, 'Signing in…');
+        try {
+          const { error } = await sb.auth.signInWithPassword({
+            email: $('loginEmail').value.trim(),
+            password: $('loginPassword').value
+          });
+          if (error) throw error;
+        } catch (error) {
+          $('loginMsg').textContent = error.message || 'Could not sign in.';
+        } finally {
+          setButtonBusy(button, false);
+        }
+      });
+
+      $('logoutBtn').addEventListener('click', async () => {
+        try {
+          const { error } = await sb.auth.signOut();
+          if (error) throw error;
+        } catch (error) {
+          toast(error.message || 'Could not sign out.', 'error');
+        }
+      });
+
+      ['pmSearch', 'sprintFilter', 'projectFilter', 'priorityFilter'].forEach(id => {
+        $(id).addEventListener(id === 'pmSearch' ? 'input' : 'change', renderProject);
+      });
+      $('clearPmFilters').addEventListener('click', () => {
+        ['pmSearch', 'sprintFilter', 'projectFilter', 'priorityFilter'].forEach(id => { $(id).value = ''; });
+        renderProject();
+      });
+      $('newProjectTaskBtn').addEventListener('click', () => openProjectTask());
+
+      $('projectTaskForm').addEventListener('submit', async event => {
+        event.preventDefault();
+        const button = $('saveProjectTaskBtn');
+        const id = $('projectTaskId').value;
+        const payload = {
+          title: $('projectTaskTitle').value.trim(),
+          description: trimOrNull($('projectTaskDescription').value),
+          project_name: trimOrNull($('projectName').value),
+          sprint_name: trimOrNull($('sprintName').value),
+          status: $('projectTaskStatus').value,
+          priority: $('projectTaskPriority').value,
+          assignee: trimOrNull($('projectTaskAssignee').value),
+          due_date: $('projectTaskDue').value || null,
+          labels: trimOrNull($('projectTaskLabels').value)
+        };
+
+        setButtonBusy(button, true, 'Saving…');
+        try {
+          if (id) {
+            await requireSuccess(sb.from('project_tasks').update(payload).eq('id', id).select('id').single(), 'Could not update task.');
+          } else {
+            await requireSuccess(sb.from('project_tasks').insert(payload).select('id').single(), 'Could not create task.');
+          }
+          closeModal('taskModal');
+          toast(id ? 'Task updated.' : 'Task created.', 'success');
+          await loadAll();
+        } catch (error) {
+          toast(error.message, 'error');
+        } finally {
+          setButtonBusy(button, false);
+        }
+      });
+
+      $('addTaskUpdateBtn').addEventListener('click', async () => {
+        const taskId = $('projectTaskId').value;
+        const note = $('taskUpdateNote').value.trim();
+        if (!taskId) {
+          toast('Save the task before adding updates.', 'error');
+          return;
+        }
+        if (!note) {
+          toast('Enter an update note.', 'error');
+          return;
+        }
+        const button = $('addTaskUpdateBtn');
+        setButtonBusy(button, true, 'Adding…');
+        try {
+          const email = currentSession?.user?.email || 'Signed-in user';
+          await requireSuccess(
+            sb.from('project_task_updates').insert({
+              task_id: taskId,
+              note,
+              created_by: currentSession?.user?.id,
+              author_email: email
+            }).select('id').single(),
+            'Could not add task update.'
+          );
+          $('taskUpdateNote').value = '';
+          toast('Update added with date and time.', 'success');
+          await loadTaskUpdates(taskId);
+        } catch (error) {
+          toast(error.message, 'error');
+        } finally {
+          setButtonBusy(button, false);
+        }
+      });
+
+      $('deleteProjectTaskBtn').addEventListener('click', async () => {
+        const id = $('projectTaskId').value;
+        if (!id || !window.confirm('Delete this project task?')) return;
+        const button = $('deleteProjectTaskBtn');
+        setButtonBusy(button, true, 'Deleting…');
+        try {
+          await requireSuccess(sb.from('project_tasks').delete().eq('id', id).select('id').single(), 'Could not delete task.');
+          closeModal('taskModal');
+          toast('Task deleted.', 'success');
+          await loadAll();
+        } catch (error) {
+          toast(error.message, 'error');
+        } finally {
+          setButtonBusy(button, false);
+        }
+      });
+
+      $('manageTypesBtn').addEventListener('click', () => openModal('typesModal'));
+      $('addTypeBtn').addEventListener('click', async () => {
+        const name = $('newTypeName').value.trim();
+        if (!name) {
+          toast('Enter a task type name.', 'error');
+          return;
+        }
+        const button = $('addTypeBtn');
+        setButtonBusy(button, true, 'Adding…');
+        try {
+          const nextSortOrder = taskTypes.reduce((max, type) => Math.max(max, Number(type.sort_order) || 0), 0) + 1;
+          await requireSuccess(sb.from('maintenance_task_types').insert({ name, sort_order: nextSortOrder }).select('id').single(), 'Could not add task type.');
+          $('newTypeName').value = '';
+          toast('Task type added.', 'success');
+          await loadAll();
+        } catch (error) {
+          toast(error.message, 'error');
+        } finally {
+          setButtonBusy(button, false);
+        }
+      });
+
+      ['maintenanceSearch', 'maintenanceStatusFilter', 'maintenanceDateFilter', 'maintenanceFrequencyFilter'].forEach(id => {
+        $(id).addEventListener(id === 'maintenanceSearch' ? 'input' : 'change', renderMaintenance);
+      });
+      $('clearMaintenanceFilters').addEventListener('click', () => {
+        ['maintenanceSearch', 'maintenanceStatusFilter', 'maintenanceDateFilter', 'maintenanceFrequencyFilter'].forEach(id => { $(id).value = ''; });
+        activeMaintenanceType = '';
+        renderMaintenance();
+      });
+      $('clearMaintenance').addEventListener('click', resetMaintenance);
+
+      $('maintenanceForm').addEventListener('submit', async event => {
+        event.preventDefault();
+        if (!taskTypes.length) {
+          toast('Add a maintenance task type before creating a record.', 'error');
+          return;
+        }
+
+        const button = $('saveMaintenanceBtn');
+        const id = $('maintenanceId').value;
+        const status = $('maintenanceStatus').value;
+        const payload = {
+          task_type_id: $('maintenanceType').value,
+          property: $('property').value.trim(),
+          area: trimOrNull($('area').value),
+          assigned_to: trimOrNull($('maintenanceAssigned').value),
+          scheduled_date: $('scheduledDate').value,
+          scheduled_time: $('scheduledTime').value || null,
+          frequency: $('frequency').value,
+          status,
+          completed_date: $('completedDate').value || (status === 'Completed' ? today() : null),
+          notes: trimOrNull($('maintenanceNotes').value)
+        };
+
+        setButtonBusy(button, true, 'Saving…');
+        try {
+          if (id) {
+            await requireSuccess(sb.from('maintenance_records').update(payload).eq('id', id).select('id').single(), 'Could not update maintenance record.');
+          } else {
+            await requireSuccess(sb.from('maintenance_records').insert(payload).select('id').single(), 'Could not create maintenance record.');
+          }
+          const previousRecord = id ? maintenanceRecords.find(item => item.id === id) : null;
+          const createdNextOccurrence = Boolean(
+            id &&
+            previousRecord &&
+            previousRecord.status !== 'Completed' &&
+            status === 'Completed' &&
+            payload.frequency !== 'One-time'
+          );
+
+          resetMaintenance();
+          toast(
+            createdNextOccurrence
+              ? 'Maintenance completed. The next recurring occurrence was scheduled automatically.'
+              : (id ? 'Maintenance record updated.' : 'Maintenance record created.'),
+            'success'
+          );
+          await loadAll();
+        } catch (error) {
+          toast(error.message, 'error');
+        } finally {
+          setButtonBusy(button, false);
+        }
+      });
+
+      $('exportBtn').addEventListener('click', exportWordReport);
+
+      document.querySelectorAll('[data-close]').forEach(button => {
+        button.addEventListener('click', () => closeModal(button.dataset.close));
+      });
+      document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('click', event => {
+          if (event.target === modal) closeModal(modal.id);
+        });
+      });
+      document.addEventListener('keydown', event => {
+        if (event.key === 'Escape') {
+          document.querySelectorAll('.modal:not(.hidden)').forEach(modal => closeModal(modal.id));
+        }
+      });
+
+      window.addEventListener('beforeunload', () => authSubscription?.unsubscribe());
+
+      resetMaintenance();
+      renderAll();
+      init();
+    });
+  </script>
+</body>
+</html>
